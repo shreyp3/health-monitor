@@ -21,6 +21,12 @@ const FAKE_VITALS = {
   motion: "Low",
 };
 
+type SessionReading = {
+  vitals: typeof FAKE_VITALS;
+  agentResponse: string;
+  timestamp: string;
+};
+
 type Message = {
   id: string;
   role: "agent";
@@ -51,6 +57,7 @@ function MessageCard({ message }: { message: Message }) {
 export default function AgentScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sessionHistory, setSessionHistory] = useState<SessionReading[]>([]);
 
   const getTimestamp = () => {
     const now = new Date();
@@ -61,6 +68,16 @@ export default function AgentScreen() {
     setLoading(true);
 
     try {
+      const historyContext =
+        sessionHistory.length > 0
+          ? `Previous readings this session:\n${sessionHistory
+              .map(
+                (r, i) =>
+                  `${r.timestamp} - HR: ${r.vitals.heartRate} BPM, SpO2: ${r.vitals.spo2}%, Temp: ${r.vitals.temperature}°F, Motion: ${r.vitals.motion}\nYour response: ${r.agentResponse}`,
+              )
+              .join("\n\n")}\n\n`
+          : "";
+
       const response = await groq.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
@@ -69,18 +86,19 @@ export default function AgentScreen() {
             content: `You are a health monitoring AI assistant. You analyze vital signs and provide clear, 
             concise health feedback. You are not a doctor and always remind users to consult healthcare 
             professionals for medical advice. Keep responses under 3 sentences. Be direct and helpful.
+            You have memory of previous readings this session and should reference trends when relevant.
             Classify your response as one of: normal (vitals look good), warning (something needs attention), 
             or info (general health tip). Start your response with [normal], [warning], or [info].`,
           },
           {
             role: "user",
-            content: `Analyze these vital signs and provide feedback:
+            content: `${historyContext}Current vital signs:
             Heart Rate: ${FAKE_VITALS.heartRate} BPM
             SpO2: ${FAKE_VITALS.spo2}%
             Temperature: ${FAKE_VITALS.temperature}°F
             Motion Level: ${FAKE_VITALS.motion}
             
-            Provide a brief health insight based on these readings.`,
+            Based on the current readings${sessionHistory.length > 0 ? " and the session history above" : ""}, provide a brief health insight.`,
           },
         ],
         max_tokens: 150,
@@ -102,11 +120,22 @@ export default function AgentScreen() {
         cleanContent = content.replace("[info]", "").trim();
       }
 
+      const timestamp = getTimestamp();
+
+      setSessionHistory((prev) => [
+        ...prev,
+        {
+          vitals: FAKE_VITALS,
+          agentResponse: cleanContent,
+          timestamp,
+        },
+      ]);
+
       const newMessage: Message = {
         id: Date.now().toString(),
         role: "agent",
         content: cleanContent,
-        timestamp: getTimestamp(),
+        timestamp,
         type,
       };
 
