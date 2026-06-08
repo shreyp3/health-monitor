@@ -1089,6 +1089,13 @@ C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_m
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/ulp/CMakeFiles/install.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/ulp/CMakeFiles/install/local.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/ulp/CMakeFiles/install/strip.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/__idf_espressif__ssd1306.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/edit_cache.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/rebuild_cache.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/list_install_components.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/install.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/install/local.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/espressif__ssd1306/CMakeFiles/install/strip.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/main/CMakeFiles/__idf_main.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/main/CMakeFiles/edit_cache.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/main/CMakeFiles/rebuild_cache.dir
