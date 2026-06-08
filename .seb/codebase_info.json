@@ -178,6 +178,18 @@
         {
             "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\app\\.env",
             "tags": []
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\dependencies.lock",
+            "tags": []
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\sdkconfig",
+            "tags": []
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\SEB.MD",
+            "tags": []
         }
     ]
 }

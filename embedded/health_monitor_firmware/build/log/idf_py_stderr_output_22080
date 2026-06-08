@@ -1,0 +1,23 @@
+Command: cmake -G Ninja -B C:\Users\patel\OneDrive\Documents\code\Projects\health_monitor\embedded\health_monitor_firmware\build -DPYTHON_DEPS_CHECKED=1 -DPYTHON=C:\Users\patel\.espressif\python_env\idf6.0_py3.11_env\Scripts\python.exe -DESP_PLATFORM=1 -DCCACHE_ENABLE=True C:\Users\patel\OneDrive\Documents\code\Projects\health_monitor\embedded\health_monitor_firmware
+Configuration Report               
++---------------------------------+
+|  Parser Version: 1              |
+|  Verbosity: default             |
+|  Defaults policy: sdkconfig     |
+|  Status: Finished successfully  |
+|                                 |
++---------------------------------+
+CMake Warning in C:/esp/v6.0.1/esp-idf/components/mbedtls/mbedtls/tf-psa-crypto/core/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/mbedtls/mbedtls/tf-psa-crypto/core/CMakeFiles/tfpsacrypto.dir/./
+
+  has 174 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    cab966582a2f09fb526898c48d4096d5/psa_crypto_driver_esp_hmac_transparent.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+

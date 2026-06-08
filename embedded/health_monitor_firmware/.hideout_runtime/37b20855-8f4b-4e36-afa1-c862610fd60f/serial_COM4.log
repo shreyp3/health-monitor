@@ -1,0 +1,1336 @@
+[19:09:13.809] ,[19:09:13.875]  SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+I (27) boot: ESP-IDF v6.0.1 2nd stage bootloader
+I (27) boot: compile time Jun  2 2026 01:15:33
+I (28) boot: Multicore bootloader
+I (29) boot: chip revision: v3.1
+I (32) boot.esp32: SPI Speed      : 40MHz
+I (35) boot.esp32: SPI Mode       : DIO
+I (39) boot.esp32: SPI Flash Size : 2MB
+I (42) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (49) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (62) boo[19:09:13.927] t:  1 phy_init         RF data          01 01 0000f000 00001000
+I (69) boot:  2 factory          factory app      00 00 00010000 00100000
+I (75) boot: End of partition table
+I (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0aa94h ( 43668) map
+I (102) esp_image: segment 1: paddr=0001aabc vaddr=3ffb0000 size=02a5ch ( 10844) load
+I (106) esp_image: segment 2: paddr=0001d520 vaddr=40080000 size=02af8h ( 11000) load
+I (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0f5e0h ( 62944) map
+[19:09:13.979] I (136) esp_image: segment 4: paddr=0002f608 vaddr=40082af8 size=0939ch ( 37788) load
+I (151) esp_image: segment 5: paddr=000389ac vaddr=50000000 size=00028h (    40) load
+I (158) boot: Loaded app from partition at offset 0x10000
+I (158) boot: Disabling RNG early entropy source...
+I (169) cpu_start: Multicore app
+I (178) cpu_start: [19:09:14.046] GPIO 3 and 1 are used as console UART I/O pins
+I (178) cpu_start: Pro cpu start user code
+I (178) cpu_start: cpu freq: 160000000 Hz
+I (180) app_init: Application information:
+I (184) app_init: Project name:     health_monitor_firmware
+I (189) app_init: App version:      571c300-dirty
+I (193) app_init: Compile time:     Jun  8 2026 18:15:27
+I (198) app_init: ELF file SHA256:  58b1d4439...
+I (203) app_init: ESP-IDF:          v6.0.1
+I (207) efuse_init: Min chip rev:     v0.0
+I (210) efuse_init: Max chip rev:     v3.99 
+I (214) efuse_init: Chip rev:         v3.1
+I (218) heap_init: Initializing. RAM available for dynamic allocation:
+I (225) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM
+I (230) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): D[19:09:14.110] RAM
+I (235) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM
+I (240) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (246) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM
+I (252) spi_flash: detected chip: generic
+I (255) spi_flash: flash io: dio
+W (258) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+W (270) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`
+I (280) main_task: Started on CPU0
+I (290) main_task: Calling app_main()
+[19:09:14.329] I (490) HEALTH_MONITOR: MAX30102 initialized
+I (490) HEALTH_MONITOR: WR: 0  RD: 0  samples: 0
+[19:09:14.395] I (530) HEALTH_MONITOR: WR: 4  RD: 0  samples: 4
+I (530) HEALTH_MONITOR: RAW IR: 2499  RED: 2564
+[19:09:14.448] I (620) HEALTH_MONITOR: No finger
+I (620) HEALTH_MONITOR: RAW IR: 2497  RED: 2500
+[19:09:14.525] I[19:09:14.577]  (720) HEALTH_MONITOR: No finger
+I (720) HEALTH_MONITOR: RAW IR: 2496  RED: 2495
+[19:09:14.630] I (820) HEALTH_MONITOR: No finger
+I (820) HEALTH_MONITOR: RAW IR: 2502  RED: 2496
+[19:09:14.718] I[19:09:14.779]  (910) HEALTH_MONITOR: No finger
+I (950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:14.845] I (990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:14.911] I (1070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:14.962] I (1110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.014] I (1190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.077] I (1230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.129] I (1310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.195] I (1350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1390) HEALTH_MONITOR: WR: 4  RD: 4  sample[19:09:15.246] s: 0
+I (1430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.311] I (1470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.362] I (1510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.413] I (1590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.478] I (1630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.543] I (1710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.597] I (1750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.663] I (1830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.731] I (1870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.793] I (1950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (1990) HEALTH_MONIT[19:09:15.846] OR: WR: 4  RD: 4  samples: 0
+I (2030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.898] I (2070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:15.961] I (2110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.013] I (2190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.079] I (2230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.132] I (2310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.195] I (2350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2390) HEALTH_MONITOR: WR: 4  RD: 4  sampl[19:09:16.262] es: 0
+I (2430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.314] I (2470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2510) HEALTH_MONITOR: WR: 4  RD: [19:09:16.379] 4  samples: 0
+I (2550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.444] I (2590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.496] I (2670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.563] I (2710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.615] I (2790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.677] I (2830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.730] I (2910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.788] I (2950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.844] I (2990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.896] I (3070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:16.949] I (3110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.012] I (3150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.078] I (3230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.130] I (3310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.181] I (3350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.247] I (3390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.313] I (3470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3510) HEALT[19:09:17.365] H_MONITOR: WR: 4  RD: 4  samples: 0
+I (3550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.430] I (3590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.495] I (3630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.546] I (3710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.597] I (3750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.665] I (3830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.729] I (3870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (3910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.781] I (3950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.848] I (3990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.911] I (4070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:17.963] I (4110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.014] I (4190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.067] I (4230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.130] I (4270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.181] I (4350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.233] I (4390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4430) HEALTH_MONIT[19:09:18.295] OR: WR: 4  RD: 4  samples: 0
+I (4470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.348] I (4510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.399] I (4550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.461] I (4630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.513] I (4670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4710) HEALTH_MONITO[19:09:18.566] R: WR: 4  RD: 4  samples: 0
+I (4750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.632] I (4790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (483[19:09:18.696] 0) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.748] I (4910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.800] I (4950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (4990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.863] I (5030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.929] I (5070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:18.981] I (5150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.032] I (5190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5230) HEA[19:09:19.097] LTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.149] I (5310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.200] I (5350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.262] I (5430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.315] I (5470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5510) HEALTH_MONITOR: WR: 4  RD: [19:09:19.382] 4  samples: 0
+I (5550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.434] I (5590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5630) HEALTH_MONITOR: [19:09:19.497] WR: 4  RD: 4  samples: 0
+I (5670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.550] I (5710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.601] I (5750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.663] I (5830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.716] I (5870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (5910) HEALTH_MONITOR: WR: 4  RD: 4  sampl[19:09:19.767] es: 0
+I (5950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.829] I (5990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.881] I (6030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.933] I (6110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:19.999] I (6150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.063] I (6230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.115] I (6270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6310) HEALTH_MONITOR: WR: 4  RD: 4  samp[19:09:20.167] les: 0
+I (6350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.230] I (6390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.282] I (6430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.334] I (6510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.400] I (6550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.466] I (6630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.530] I (6670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.584] I (6750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.649] I (6790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.713] I (6870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (6910) HEALT[19:09:20.766] H_MONITOR: WR: 4  RD: 4  samples: 0
+I (6950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.833] I (6990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7030) HEALTH_MO[19:09:20.885] NITOR: WR: 4  RD: 4  samples: 0
+I (7070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:20.949] I (7110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.015] I (7150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.068] I (7230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.133] I (7270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.198] I (7350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.249] I (7430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.301] I (7470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.364] I (7510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.416] I (7590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.483] I (7630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.534] I (7710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.600] I (7750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.666] I (7830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.732] I (7870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (7910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.785] I (7950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.850] I (7990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:21.914] I (8070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8110) HEALTH_MONITOR: WR: 4  [19:09:21.968] RD: 4  samples: 0
+I (8150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.019] I (8190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.083] I (8230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.148] I (8310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.201] I (8350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.268] I (8430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.331] I (8470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.383] I (8550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.435] I (8590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8630) HEALTH_MONITOR: WR: 4  RD: 4  samples:[19:09:22.501]  0
+I (8670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.565] I (8710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.617] I (8790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.669] I (8830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.734] I (8870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.798] I (8950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (8990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.850] I (9030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:22.915] I (9070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9110) HEALTH_MONITOR: WR: 4  RD: 4  sample[19:09:22.968] s: 0
+I (9150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.033] I (9190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9230) HEALTH_MON[19:09:23.086] ITOR: WR: 4  RD: 4  samples: 0
+I (9270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.152] I (9310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9350)[19:09:23.218]  HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.285] I (9430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.350] I (9510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.403] I (9550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.469] I (9630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.534] I (9670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.585] I (9750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.653] I (9790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.707] I (9870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.769] I (9910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (9950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.835] I (9990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10030) HEALTH_MONITOR: WR: 4  RD: 4  samp[19:09:23.901] les: 0
+I (10070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:23.953] I (10110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10150) HEALTH_MONI[19:09:24.018] TOR: WR: 4  RD: 4  samples: 0
+I (10190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.084] I (10230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.150] I (10310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.204] I (10350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.269] I (10430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.334] I (10470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.401] I (10550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.454] I (10630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.520] I (10670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.586] I (10750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.651] I (10790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.719] I (10870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (10910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.770] I (10950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.837] I (10990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.902] I (11070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:24.953] I (11110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11150) HEALTH_M[19:09:25.004] ONITOR: WR: 4  RD: 4  samples: 0
+I (11190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.070] I (11230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.134] I (11270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.186] I (11350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.238] I (11390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.300] I (11470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.352] I (11510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (115[19:09:25.404] 50) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.467] I (11630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.520] I (11670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.586] I (11750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.637] I (11790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.702] I (11870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.768] I (11910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (11950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.820] I (11990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.886] I (12030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:25.952] I (12110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12150) HEAL[19:09:26.017] TH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.081] I (12230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.145] I (12310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.208] I (12350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.272] I (12430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (124[19:09:26.336] 70) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.403] I (12550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.454] I (12630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.521] I (12670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.584] I (12750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.636] I (12790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.687] I (12870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.753] I (12910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (12950) HEALTH_M[19:09:26.804] ONITOR: WR: 4  RD: 4  samples: 0
+I (12990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.870] I (13030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:26.938] I (13070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.002] I (13150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.065] I (13230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.120] I (13270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.171] I (13350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.234] I (13390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13430) HEALTH_MONITOR: W[19:09:27.287] R: 4  RD: 4  samples: 0
+I (13470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.339] I (13510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.405] I (13550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.470] I (13630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.536] I (13670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.589] I (13750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.655] I (13790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.719] I (13870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (13910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.771] I (13950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.823] I (13990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.888] I (14030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:27.953] I (14110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14150) HEALTH_M[19:09:28.004] ONITOR: WR: 4  RD: 4  samples: 0
+I (14190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.057] I (14230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.119] I (14270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.171] I (14350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.223] I (14390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.285] I (14430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.337] I (14510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.389] I (14550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.455] I (14590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.521] I (14670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.587] I (14750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.640] I (14790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.706] I (14870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.771] I (14910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (14950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.822] I (14990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:28.873] I (15030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15070) HEALTH_MONITOR:[19:09:28.939]  WR: 4  RD: 4  samples: 0
+I (15110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.002] I (15150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.055] I (15230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.106] I (15270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.171] I (15310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.222] I (15390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.288] I (15430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.340] I (15510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.407] I (15550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.471] I (15630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.524] I (15670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.588] I (15750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.655] I (15790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.719] I (15870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (15910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.772] I (15950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.824] I (15990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.888] I (16030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:29.955] I (16110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16150) HEALTH_MONITOR: WR: 4  RD: 4  samples:[19:09:30.006]  0
+I (16190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.073] I (16230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16270) HEALTH_MONI[19:09:30.136] TOR: WR: 4  RD: 4  samples: 0
+I (16310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.188] I (16350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.251] I (16390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.315] I (16470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16510) HEALTH_MONITOR: WR: 4  RD: 4  sam[19:09:30.379] ples: 0
+I (16550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.443] I (16590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.507] I (16670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.571] I (16710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.635] I (16790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16830) HEALTH_MONITOR: WR: 4  RD: [19:09:30.689] 4  samples: 0
+I (16870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.756] I (16910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (16950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.823] I (16990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.874] I (17030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17070) HEALTH_MONITOR: WR: [19:09:30.937] 4  RD: 4  samples: 0
+I (17110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:30.990] I (17150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.057] I (17190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.108] I (17270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.172] I (17310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.223] I (17390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.275] I (17430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17470) HEALTH_MONITOR: WR: 4  RD: 4  sam[19:09:31.337] ples: 0
+I (17510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.390] I (17550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.441] I (17590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.507] I (17670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.570] I (17710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.624] I (17790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.675] I (17830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (17870) HEALTH_MONITOR: WR: 4  RD: 4  samples[19:09:31.737] : 0
+I (17910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.790] I (17950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.841] I (17990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.908] I (18070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:31.973] I (18110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.024] I (18190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.075] I (18230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18270) HEALTH_MONITOR: WR: 4  RD: 4  samples[19:09:32.138] : 0
+I (18310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.190] I (18350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.242] I (18390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.307] I (18470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.374] I (18510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.440] I (18590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.492] I (18670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.558] I (18710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.624] I (18790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.690] I (18830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.742] I (18910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.808] I (18950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (18990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.873] I (19030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19070) HEALTH_MO[19:09:32.925] NITOR: WR: 4  RD: 4  samples: 0
+I (19110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:32.991] I (19150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.047] I (19190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.106] I (19270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.158] I (19310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.209] I (19390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.275] I (19430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19470) HEALTH_MONITOR: WR: 4  RD: 4[19:09:33.341]   samples: 0
+I (19510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.407] I (19550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.459] I (19630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.525] I (19670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.589] I (19750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.652] I (19790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.716] I (19870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (19910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.779] I (19950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.843] I (19990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.906] I (20070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:33.958] I (20110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.010] I (20190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.075] I (20230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20270) HEALTH_MONITOR: WR: 4  RD: 4  sam[19:09:34.141] ples: 0
+I (20310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.193] I (20350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20390) HEALTH_MONITOR: [19:09:34.259] WR: 4  RD: 4  samples: 0
+I (20430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.326] I (20470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.391] I (20550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.442] I (20590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.494] I (20670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.557] I (20710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.609] I (20790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.660] I (20830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.726] I (20870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (20910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.777] I (20950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.842] I (20990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.910] I (21070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:34.975] I (21110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.040] I (21190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.093] I (21270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.144] I (21310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.210] I (21350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.274] I (21430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21470) HEALTH_MONITOR: WR[19:09:35.338] : 4  RD: 4  samples: 0
+I (21510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.402] I (21550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.459] I (21630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.522] I (21670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.586] I (21750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.650] I (21790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.713] I (21870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (21910) HEALTH_MO[19:09:35.777] NITOR: WR: 4  RD: 4  samples: 0
+I (21950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.840] I (21990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.903] I (22070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:35.966] I (22110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.025] I (22190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.089] I (22230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.153] I (22310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22350) HEALTH_MO[19:09:36.217] NITOR: WR: 4  RD: 4  samples: 0
+I (22390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.281] I (22430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.344] I (22510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.408] I (22550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.472] I (22630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22670)[19:09:36.527]  HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.590] I (22750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.654] I (22790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.718] I (22870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (22910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.781] I (22950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.845] I (22990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.909] I (23070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:36.973] I (23110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.037] I (23190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.091] I (23270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.155] I (23310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23350) HEALTH_MONITOR: WR: 4  RD: 4  sam[19:09:37.218] ples: 0
+I (23390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.282] I (23430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.345] I (23510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.409] I (23550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.473] I (23630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23670) HEALTH_MON[19:09:37.536] ITOR: WR: 4  RD: 4  samples: 0
+I (23710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.593] I (23750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23790) HEALTH_MONITOR: W[19:09:37.657] R: 4  RD: 4  samples: 0
+I (23830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.722] I (23870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (23910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.786] I (23950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.850] I (23990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:37.913] I (24070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24110) HEALTH_MONITOR: W[19:09:37.977] R: 4  RD: 4  samples: 0
+I (24150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.041] I (24190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.094] I (24270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.160] I (24310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.226] I (24390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.291] I (24430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.354] I (24510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24550) HEALTH_MONITOR: WR[19:09:38.417] : 4  RD: 4  samples: 0
+I (24590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.481] I (24630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.545] I (24710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.609] I (24750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.661] I (24830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.725] I (24870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (24910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.789] I (24950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.853] I (24990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.916] I (25070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:38.981] I (25150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.045] I (25190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.108] I (25270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.163] I (25310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.226] I (25390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.290] I (25430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.354] I (25510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25550) HEALTH_MONITOR: WR: 4  RD[19:09:39.418] : 4  samples: 0
+I (25590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.481] I (25630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.544] I (25710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.608] I (25750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.673] I (25830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (25870) HEALTH[19:09:39.728] _MONITOR: WR: 4  RD: 4  samples: 0
+I (25910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.791] I (25950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2[19:09:39.850] 5990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:39.912] I (26070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26110) HEA[19:09:39.964] LTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.020] I (26190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.078] I (26230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.131] I (26310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.197] I (26350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.262] I (26430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.313] I (26470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26510) HEALTH_MONI[19:09:40.366] TOR: WR: 4  RD: 4  samples: 0
+I (26550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.428] I (26590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.479] I (26630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.531] I (26710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.594] I (26750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26790) HEALTH_MONITOR: WR: 4  RD:[19:09:40.646]  4  samples: 0
+I (26830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.713] I (26870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (26910) HEALTH_MONI[19:09:40.781] TOR: WR: 4  RD: 4  samples: 0
+I (26950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.847] I (26990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.911] I (27070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:40.963] I (27110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.014] I (27190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.078] I (27230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.130] I (27310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.181] I (27350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.248] I (27390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.313] I (27470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27510) HEALTH_MON[19:09:41.379] ITOR: WR: 4  RD: 4  samples: 0
+I (27550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.431] I (27590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I[19:09:41.499]  (27630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.563] I (27710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.629] I (27790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.681] I (27830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.732] I (27910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.795] I (27950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (27990) HEALTH_MONITOR: WR: 4  RD: 4  samples[19:09:41.848] : 0
+I (28030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.899] I (28070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:41.962] I (28110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.014] I (28190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.066] I (28230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.131] I (28270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.196] I (28350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.247] I (28430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.299] I (28470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.364] I (28510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.430] I (28590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.483] I (28630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.546] I (28710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.611] I (28750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.664] I (28830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.715] I (28870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (28910) HEALTH_MONITOR: WR: 4  RD: 4  samples:[19:09:42.781]  0
+I (28950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.846] I (28990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.898] I (29070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:42.949] I (29110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.013] I (29150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.065] I (29230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.119] I (29270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.181] I (29350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.247] I (29390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.314] I (29470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29510) HEALTH_MONITOR: WR: 4 [19:09:43.366]  RD: 4  samples: 0
+I (29550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.431] I (29590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (2[19:09:43.482] 9630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.533] I (29710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.600] I (29750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.665] I (29830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.731] I (29870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.797] I (29950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (29990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.850] I (30030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.902] I (30070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:43.966] I (30110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.033] I (30190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30230) HEALTH_MON[19:09:44.085] ITOR: WR: 4  RD: 4  samples: 0
+I (30270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.146] I (30310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.199] I (30350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.251] I (30430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.315] I (30470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30510) HEALTH_MONITOR: WR: 4  RD: 4  s[19:09:44.366] amples: 0
+I (30550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.417] I (30590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.482] I (30630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.547] I (30710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.599] I (30750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.651] I (30830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.715] I (30870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (30910) HEALTH_MONITOR: WR: 4  RD: 4  sampl[19:09:44.766] es: 0
+I (30950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.817] I (30990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.880] I (31030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.932] I (31110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:44.983] I (31150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.048] I (31190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.099] I (31270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.151] I (31310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.218] I (31350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.281] I (31430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.347] I (31510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.400] I (31550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.451] I (31630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.516] I (31670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.567] I (31750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.619] I (31790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.681] I (31830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (31870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.733] I (31910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.785] I (31950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.848] I (31990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.901] I (32070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:45.967] I (32110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.018] I (32190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.083] I (32230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.149] I (32310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.202] I (32350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.270] I (32430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.332] I (32470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.384] I (32550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.451] I (32590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.503] I (32670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.567] I (32710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.632] I (32790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32830) HEA[19:09:46.685] LTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.752] I (32910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32950) HEA[19:09:46.817] LTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (32990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.882] I (33030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.934] I (33110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:46.987] I (33150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.051] I (33190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.117] I (33270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.168] I (33350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.235] I (33390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33430) HEALTH_MONITOR: WR: 4  RD: 4  samples:[19:09:47.301]  0
+I (33470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.367] I (33510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.418] I (33590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.469] I (33630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.534] I (33670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.585] I (33750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.636] I (33790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.701] I (33870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.768] I (33910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (33950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.833] I (33990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34030) HEALTH_MONI[19:09:47.886] TOR: WR: 4  RD: 4  samples: 0
+I (34070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:47.954] I (34110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34150) HEALTH_MONITOR: WR: 4 [19:09:48.016]  RD: 4  samples: 0
+I (34190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.069] I (34230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.120] I (34270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.184] I (34350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.235] I (34390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34430) HEALTH_MONITOR: WR: 4  RD: 4  sampl[19:09:48.302] es: 0
+I (34470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.353] I (34510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34550) HEALTH_MONIT[19:09:48.417] OR: WR: 4  RD: 4  samples: 0
+I (34590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.468] I (34630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.520] I (34670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.584] I (34750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.635] I (34790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0[19:09:48.687] 
+I (34870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.750] I (34910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.819] I (34950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (34990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.885] I (35030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:48.937] I (35110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.003] I (35150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.067] I (35230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.119] I (35270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.186] I (35350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.237] I (35390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.301] I (35470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.353] I (35510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35550) HEALTH_MONITO[19:09:49.405] R: WR: 4  RD: 4  samples: 0
+I (35590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.467] I (35630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.519] I (35670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.571] I (35750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.635] I (35790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35830) HEALTH_MONITOR: WR: 4  RD: 4  samples:[19:09:49.687]  0
+I (35870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.753] I (35910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (35950) HEALTH_MONITOR[19:09:49.805] : WR: 4  RD: 4  samples: 0
+I (35990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.868] I (36030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.921] I (36070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:49.987] I (36150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.051] I (36190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.103] I (36270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.170] I (36310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.225] I (36390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.284] I (36430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.336] I (36510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.388] I (36550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.453] I (36590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.519] I (36670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.571] I (36750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.637] I (36790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.705] I (36870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.769] I (36910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (36950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.822] I (36990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.888] I (37030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:50.952] I (37110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37150) HEALTH_[19:09:51.003] MONITOR: WR: 4  RD: 4  samples: 0
+I (37190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.055] I (37230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.121] I (37270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.188] I (37350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.252] I (37390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.305] I (37470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.371] I (37510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.438] I (37590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.501] I (37670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.554] I (37710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37750) HEALTH_MONITOR: WR: 4  RD: [19:09:51.621] 4  samples: 0
+I (37790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.673] I (37830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (37870) HEALTH_MONI[19:09:51.735] TOR: WR: 4  RD: 4  samples: 0
+I (37910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.788] I (37950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.840] I (37990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.903] I (38070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:51.954] I (38110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38150) HEALTH_MONITOR: WR: 4  RD: 4[19:09:52.007]   samples: 0
+I (38190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.070] I (38230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.121] I (38270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.172] I (38350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.238] I (38390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.303] I (38470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.355] I (38510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38550) HEALTH_MONITOR: WR: 4  RD: 4  samples[19:09:52.422] : 0
+I (38590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.489] I (38630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.553] I (38710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38750) HEALTH_MONI[19:09:52.605] TOR: WR: 4  RD: 4  samples: 0
+I (38790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.672] I (38830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38[19:09:52.723] 870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (38910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.785] I (38950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.838] I (38990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.889] I (39070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:52.954] I (39110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39150) HEALTH_MONITOR: WR: 4  RD: [19:09:53.005] 4  samples: 0
+I (39190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.072] I (39230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (392[19:09:53.124] 70) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.187] I (39350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.239] I (39390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.291] I (39470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.354] I (39510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39550) HEALTH_MONITOR: W[19:09:53.405] R: 4  RD: 4  samples: 0
+I (39590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.456] I (39630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.521] I (39670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.573] I (39750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.639] I (39790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.706] I (39870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.769] I (39910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (39950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.832] I (39990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40030) HEALTH[19:09:53.896] _MONITOR: WR: 4  RD: 4  samples: 0
+I (40070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:53.960] I (40110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.021] I (40190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.085] I (40230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.149] I (40310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.213] I (40350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.277] I (40430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.340] I (40510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.404] I (40550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.467] I (40630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.523] I (40670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.587] I (40750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.651] I (40790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.714] I (40870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (40910) HEALTH_MONITOR: WR: 4  R[19:09:54.778] D: 4  samples: 0
+I (40950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.842] I (40990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.905] I (41070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:54.968] I (41110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.032] I (41190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41230) HEAL[19:09:55.088] TH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.152] I (41310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41350) HEALTH_[19:09:55.216] MONITOR: WR: 4  RD: 4  samples: 0
+I (41390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.279] I (41430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.342] I (41510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.406] I (41550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.470] I (41630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.534] I (41670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.591] I (41750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.654] I (41790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.717] I (41870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (41910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.781] I (41950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.845] I (41990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.908] I (42070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:55.972] I (42110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.035] I (42190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42230) HEALTH_MONITOR: WR: 4  RD: 4  samples: [19:09:56.099] 0
+I (42270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.156] I (42310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.220] I (42390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.284] I (42430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.347] I (42510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.410] I (42550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.475] I (42630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42670) HEALTH_MONITOR: WR: 4  RD: 4  s[19:09:56.539] amples: 0
+I (42710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.602] I (42750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.657] I (42830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.721] I (42870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (42910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.785] I (42950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.847] I (42990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.910] I (43070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:56.974] I (43110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.037] I (43190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.101] I (43270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.164] I (43310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.223] I (43390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.286] I (43430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.350] I (43510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.414] I (43550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.478] I (43630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.542] I (43710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.606] I (43750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.670] I (43830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.725] I (43870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (43910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.788] I (43950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.853] I (43990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.916] I (44070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:57.979] I (44150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.042] I (44190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.106] I (44270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.170] I (44310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.233] I (44390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44430) HEALTH_MONITOR: WR:[19:09:58.290]  4  RD: 4  samples: 0
+I (44470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.354] I (44510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44550) HEALTH_MONITOR: WR: 4[19:09:58.418]   RD: 4  samples: 0
+I (44590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.481] I (44630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.545] I (44710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.609] I (44750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.672] I (44830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44870) HEALT[19:09:58.736] H_MONITOR: WR: 4  RD: 4  samples: 0
+I (44910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.792] I (44950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (44990[19:09:58.855] ) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.919] I (45070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:58.983] I (45150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.047] I (45190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.111] I (45270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.175] I (45310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.238] I (45390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.293] I (45470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.357] I (45510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.421] I (45590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.484] I (45630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.547] I (45710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.611] I (45750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.675] I (45830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45870) HEALTH_MONITOR: WR: 4  RD: 4  sampl[19:09:59.738] es: 0
+I (45910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.803] I (45950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (45990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.858] I (46030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.922] I (46070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:09:59.986] I (46150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.049] I (46190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.113] I (46270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46310) HEALTH_M[19:10:00.177] ONITOR: WR: 4  RD: 4  samples: 0
+I (46350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.240] I (46390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.294] I (46470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.361] I (46510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.426] I (46590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.493] I (46630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.556] I (46710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.619] I (46790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.682] I (46830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.746] I (46910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.809] I (46950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (46990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.872] I (47030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47070) HEALT[19:10:00.925] H_MONITOR: WR: 4  RD: 4  samples: 0
+I (47110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:00.989] I (47150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.052] I (47190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.106] I (47270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.161] I (47310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.213] I (47390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.276] I (47430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.342] I (47510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.394] I (47550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47590) HEALTH_MONITOR: WR: 4  RD: 4[19:10:01.460]   samples: 0
+I (47630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.512] I (47670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47710) H[19:10:01.578] EALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.629] I (47790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.695] I (47830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.760] I (47910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (47950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.812] I (47990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.878] I (48030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.929] I (48110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:01.994] I (48150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48190) HEALTH_MONITOR: WR: 4  RD[19:10:02.060] : 4  samples: 0
+I (48230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.112] I (48270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48310) HEALT[19:10:02.179] H_MONITOR: WR: 4  RD: 4  samples: 0
+I (48350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.244] I (48390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.310] I (48470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.362] I (48510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.414] I (48590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.476] I (48630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.529] I (48710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.581] I (48750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.645] I (48790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.711] I (48870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I[19:10:02.763]  (48910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (48950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.829] I (48990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.896] I (49030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:02.962] I (49110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.014] I (49190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.076] I (49230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.129] I (49310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.195] I (49350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49390) HEALTH_MONITOR: WR: 4  RD: 4  [19:10:03.247] samples: 0
+I (49430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.313] I (49470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49510) HEALTH_MONITOR:[19:10:03.380]  WR: 4  RD: 4  samples: 0
+I (49550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.443] I (49590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.497] I (49670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.563] I (49710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.630] I (49790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.694] I (49830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.746] I (49910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.797] I (49950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (49990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.863] I (50030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.927] I (50070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:03.980] I (50150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.031] I (50190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I[19:10:04.094]  (50230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.146] I (50310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.198] I (50350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.264] I (50430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.328] I (50470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.380] I (50550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.447] I (50590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.514] I (50670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50710) HEALTH_MONITOR: WR: 4  R[19:10:04.565] D: 4  samples: 0
+I (50750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.630] I (50790) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.697] I (50830) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50870) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.748] I (50910) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.814] I (50950) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (50990) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.879] I (51030) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51070) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.932] I (51110) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:04.998] I (51150) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51190) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.064] I (51230) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.130] I (51270) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51310) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.196] I (51350) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51390) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.248] I (51430) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.315] I (51470) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51510) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.380] I (51550) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.446] I (51590) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51630) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.499] I (51670) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+[19:10:05.565] I (51710) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0
+I (51750) HEALTH_MONITOR: WR: 4  RD: 4  samples: 0

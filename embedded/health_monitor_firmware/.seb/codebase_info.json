@@ -27,18 +27,129 @@
             "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
             "tags": [
                 "source",
+                "rtos_task",
                 "clock_config"
             ],
             "classes": [],
             "functions": [
                 "i2c_master_init",
-                "app_main",
-                "i2c_scanner",
-                "i2c_probe_address"
+                "max30102_init",
+                "max30102_read_fifo",
+                "max30102_read_reg",
+                "max30102_write_reg",
+                "oled_init",
+                "display_raw",
+                "calculate_bpm",
+                "app_main"
             ],
             "includes": [],
             "included_by": [],
-            "text": "#include <stdio.h>\n#include \"driver/i2c.h\"\n#include \"esp_log.h\"\n\n// ============================================================\n// CONFIGURATION \u2014 you don't need to change these\n// ============================================================\n#define I2C_MASTER_SCL_IO       22          // SCL pin on ESP32\n#define I2C_MASTER_SDA_IO       21          // SDA pin on ESP32\n#define I2C_MASTER_NUM          I2C_NUM_0   // I2C port number\n#define I2C_MASTER_FREQ_HZ      100000      // 100kHz standard speed\n#define I2C_MASTER_TIMEOUT_MS   1000        // timeout in ms\n\nstatic const char *TAG = \"I2C_SCANNER\";\n\n// ============================================================\n// TASK 1 \u2014 Initialize the I2C bus\n// Fill in the i2c_config_t struct fields below\n// Use the #defines above for pin numbers and frequency\n// ============================================================\nstatic esp_err_t i2c_master_init(void)\n{\n    i2c_config_t conf = {\n        .mode = I2C_MODE_MASTER,\n        .sda_io_num = I2C_MASTER_SDA_IO,       // GPIO 21\n        .scl_io_num = I2C_MASTER_SCL_IO,       // GPIO 22\n        .sda_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SDA\n        .scl_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SCL\n        .master.clk_speed = I2C_MASTER_FREQ_HZ, // 100 kHz\n    };\n\n    // Apply the configuration to the I2C port\n    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);\n    if (err != ESP_OK) return err;\n\n    // Install the I2C driver\n    // Parameters: port, mode, rx buffer (0 for master), tx buffer (0 for master), flags\n    return i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);\n}\n\n// ============================================================\n// TASK 2 \u2014 Probe a single I2C address\n// This sends a start condition to the given address and checks\n// if anything responds with an ACK\n// You don't need to change this function\n// ============================================================\nstatic bool i2c_probe_address(uint8_t address)\n{\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    i2c_master_start(cmd);\n    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, true);\n    i2c_master_stop(cmd);\n\n    esp_err_t err = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n    i2c_cmd_link_delete(cmd);\n\n    return (err == ESP_OK);\n}\n\n// ============================================================\n// TASK 3 \u2014 Scan all I2C addresses and print results\n// Fill in the loop below to scan addresses 1 through 127\n// For each address, call i2c_probe_address()\n// If it returns true, log the address using ESP_LOGI\n// ============================================================\nstatic void i2c_scanner(void)\n{\n    ESP_LOGI(TAG, \"Starting I2C scan...\");\n    int devices_found = 0;\n\n    for (uint8_t address = 1; address < 128; address++)\n    {\n        if (i2c_probe_address(address))\n        {\n            ESP_LOGI(TAG, \"Found device at address: 0x%02X\", address);\n            devices_found++;\n        }\n    }\n\n    if (devices_found == 0) {\n        ESP_LOGI(TAG, \"No I2C devices found\");\n    } else {\n        ESP_LOGI(TAG, \"Scan complete \u2014 %d device(s) found\", devices_found);\n    }\n}\n\n// ============================================================\n// MAIN \u2014 do not modify this\n// ============================================================\nvoid app_main(void)\n{\n    // Initialize I2C\n    esp_err_t err = i2c_master_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"I2C initialization failed: %s\", esp_err_to_name(err));\n        return;\n    }\n    ESP_LOGI(TAG, \"I2C initialized successfully\");\n\n    // Run the scanner\n    i2c_scanner();\n}"
+            "text": "#include <stdio.h>\n#include <string.h>\n#include \"driver/i2c.h\"\n#include \"esp_log.h\"\n#include \"freertos/FreeRTOS.h\"\n#include \"freertos/task.h\"\n#include \"ssd1306.h\"\n\n// ============================================================\n// CONFIGURATION\n// ============================================================\n#define I2C_MASTER_SCL_IO       21\n#define I2C_MASTER_SDA_IO       22\n#define I2C_MASTER_NUM          I2C_NUM_0\n#define I2C_MASTER_FREQ_HZ      100000\n#define I2C_MASTER_TIMEOUT_MS   1000\n\n#define OLED_I2C_ADDRESS        0x3C\n#define MAX30102_I2C_ADDRESS    0x57\n\n// MAX30102 Register addresses\n#define MAX30102_REG_INTR_STATUS_1  0x00\n#define MAX30102_REG_INTR_ENABLE_1  0x02\n#define MAX30102_REG_FIFO_WR_PTR    0x04\n#define MAX30102_REG_OVF_COUNTER    0x05\n#define MAX30102_REG_FIFO_RD_PTR    0x06\n#define MAX30102_REG_FIFO_DATA      0x07\n#define MAX30102_REG_MODE_CONFIG    0x09\n#define MAX30102_REG_SPO2_CONFIG    0x0A\n#define MAX30102_REG_LED1_PA        0x0C\n#define MAX30102_REG_LED2_PA        0x0D\n\n// Heart Rate Algorithm values\n#define SAMPLE_BUFFER_SIZE  100\n#define SAMPLE_RATE_MS      40\n#define FINGER_THRESHOLD    50000\n\nstatic const char *TAG = \"HEALTH_MONITOR\";\n\n// ============================================================\n// I2C INIT\n// ============================================================\nstatic esp_err_t i2c_master_init(void)\n{\n    i2c_config_t conf = {\n        .mode = I2C_MODE_MASTER,\n        .sda_io_num = I2C_MASTER_SDA_IO,\n        .scl_io_num = I2C_MASTER_SCL_IO,\n        .sda_pullup_en = GPIO_PULLUP_ENABLE,\n        .scl_pullup_en = GPIO_PULLUP_ENABLE,\n        .master.clk_speed = I2C_MASTER_FREQ_HZ,\n    };\n    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);\n    if (err != ESP_OK) return err;\n    return i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);\n}\n\n// ============================================================\n// MAX30102 HELPER \u2014 write a single byte to a register\n// ============================================================\nstatic esp_err_t max30102_write_reg(uint8_t reg, uint8_t value)\n{\n    uint8_t data[2] = {reg, value};\n    return i2c_master_write_to_device(I2C_MASTER_NUM, MAX30102_I2C_ADDRESS,\n                                       data, sizeof(data),\n                                       pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n}\n\n// ============================================================\n// MAX30102 HELPER \u2014 read bytes from a register\n// ============================================================\nstatic esp_err_t max30102_read_reg(uint8_t reg, uint8_t *data, size_t len)\n{\n    return i2c_master_write_read_device(I2C_MASTER_NUM, MAX30102_I2C_ADDRESS,\n                                         &reg, 1, data, len,\n                                         pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n}\n\n// ============================================================\n// MAX30102 INIT\n// ============================================================\nstatic esp_err_t max30102_init(void)\n{\n    esp_err_t err;\n\n    err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x40);\n    if (err != ESP_OK) return err;\n    vTaskDelay(pdMS_TO_TICKS(100));\n\n    err = max30102_write_reg(MAX30102_REG_INTR_ENABLE_1, 0xC0);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_FIFO_WR_PTR, 0x00);\n    if (err != ESP_OK) return err;\n    err = max30102_write_reg(MAX30102_REG_OVF_COUNTER, 0x00);\n    if (err != ESP_OK) return err;\n    err = max30102_write_reg(MAX30102_REG_FIFO_RD_PTR, 0x00);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x03);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_SPO2_CONFIG, 0x27);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_LED1_PA, 0xFF);\n    if (err != ESP_OK) return err;\n    err = max30102_write_reg(MAX30102_REG_LED2_PA, 0xFF);\n    if (err != ESP_OK) return err;\n\n    ESP_LOGI(TAG, \"MAX30102 initialized\");\n    return ESP_OK;\n}\n\n// ============================================================\n// MAX30102 FIFO READ\n// ============================================================\nstatic esp_err_t max30102_read_fifo(uint32_t *red, uint32_t *ir)\n{\n    uint8_t buf[6];\n    esp_err_t err = max30102_read_reg(MAX30102_REG_FIFO_DATA, buf, 6);\n    if (err != ESP_OK) return err;\n\n    *red = ((uint32_t)(buf[0] & 0x3F) << 16) | ((uint32_t)buf[1] << 8) | buf[2];\n    *ir  = ((uint32_t)(buf[3] & 0x3F) << 16) | ((uint32_t)buf[4] << 8) | buf[5];\n\n    return ESP_OK;\n}\n\n// ============================================================\n// OLED INIT\n// ============================================================\nstatic ssd1306_handle_t oled_init(void)\n{\n    ssd1306_handle_t oled = ssd1306_create(I2C_MASTER_NUM, OLED_I2C_ADDRESS);\n    if (oled == NULL) return NULL;\n    ssd1306_refresh_gram(oled);\n    ssd1306_clear_screen(oled, 0x00);\n    return oled;\n}\n\n// ============================================================\n// DISPLAY\n// ============================================================\nstatic void display_raw(ssd1306_handle_t oled, uint32_t bpm, uint32_t ir)\n{\n    char line[32];\n    ssd1306_clear_screen(oled, 0x00);\n\n    snprintf(line, sizeof(line), \"BPM: %lu\", bpm);\n    ssd1306_draw_string(oled, 0, 0, (const uint8_t *)line, 16, 1);\n\n    snprintf(line, sizeof(line), \"IR:  %lu\", ir);\n    ssd1306_draw_string(oled, 0, 16, (const uint8_t *)line, 16, 1);\n\n    if (bpm == 0) {\n        snprintf(line, sizeof(line), \"Place finger\");\n        ssd1306_draw_string(oled, 0, 32, (const uint8_t *)line, 16, 1);\n        snprintf(line, sizeof(line), \"on sensor...\");\n        ssd1306_draw_string(oled, 0, 48, (const uint8_t *)line, 16, 1);\n    } else {\n        snprintf(line, sizeof(line), \"Reading OK\");\n        ssd1306_draw_string(oled, 0, 32, (const uint8_t *)line, 16, 1);\n    }\n\n    ssd1306_refresh_gram(oled);\n}\n\n// ============================================================\n// HEART RATE ALGORITHM\n// ============================================================\nstatic int calculate_bpm(uint32_t *ir_buffer, int buffer_size)\n{\n    uint32_t avg = 0;\n    for (int i = 0; i < buffer_size; i++) {\n        avg += ir_buffer[i];\n    }\n    avg /= buffer_size;\n\n    if (avg < FINGER_THRESHOLD) return 0;\n\n    uint32_t min_val = ir_buffer[0], max_val = ir_buffer[0];\n    for (int i = 1; i < buffer_size; i++) {\n        if (ir_buffer[i] < min_val) min_val = ir_buffer[i];\n        if (ir_buffer[i] > max_val) max_val = ir_buffer[i];\n    }\n    uint32_t range = max_val - min_val;\n\n    if (range < 200) return 0;\n\n    uint32_t peak_threshold = avg + (range * 3 / 10);\n\n    int last_peak_index = -1;\n    int peak_intervals[20];\n    int interval_count = 0;\n\n    for (int i = 1; i < buffer_size - 1; i++) {\n        if (ir_buffer[i] > ir_buffer[i-1] &&\n            ir_buffer[i] > ir_buffer[i+1] &&\n            ir_buffer[i] > peak_threshold) {\n\n            if (last_peak_index != -1) {\n                int interval = i - last_peak_index;\n                if (interval >= 7 && interval <= 31 && interval_count < 20) {\n                    peak_intervals[interval_count++] = interval;\n                }\n            }\n            last_peak_index = i;\n        }\n    }\n\n    if (interval_count < 2) return 0;\n\n    int avg_interval = 0;\n    for (int i = 0; i < interval_count; i++) {\n        avg_interval += peak_intervals[i];\n    }\n    avg_interval /= interval_count;\n\n    int clean_interval = 0;\n    int clean_count = 0;\n    for (int i = 0; i < interval_count; i++) {\n        int diff = peak_intervals[i] - avg_interval;\n        if (diff < 0) diff = -diff;\n        if (diff < avg_interval / 5) {\n            clean_interval += peak_intervals[i];\n            clean_count++;\n        }\n    }\n\n    if (clean_count < 2) return 0;\n    clean_interval /= clean_count;\n\n    int bpm = 60000 / (clean_interval * SAMPLE_RATE_MS);\n\n    if (bpm < 40 || bpm > 200) return 0;\n\n    return bpm;\n}\n\n// ============================================================\n// MAIN\n// ============================================================\nvoid app_main(void)\n{\n    esp_err_t err = i2c_master_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"I2C init failed\");\n        return;\n    }\n\n    ssd1306_handle_t oled = oled_init();\n    if (oled == NULL) {\n        ESP_LOGE(TAG, \"OLED init failed\");\n        return;\n    }\n\n    err = max30102_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"MAX30102 init failed\");\n        return;\n    }\n\n    uint32_t red = 0, ir = 0;\n    uint32_t ir_buffer[SAMPLE_BUFFER_SIZE];\n    int buffer_index = 0;\n    int bpm = 0;\n\n    int bpm_history[5] = {0};\n    int bpm_history_index = 0;\n\n    while (1) {\n        uint8_t wr_ptr = 0, rd_ptr = 0;\n        max30102_read_reg(MAX30102_REG_FIFO_WR_PTR, &wr_ptr, 1);\n        max30102_read_reg(MAX30102_REG_FIFO_RD_PTR, &rd_ptr, 1);\n        int num_samples = (wr_ptr - rd_ptr + 32) % 32;\n\n        // DEBUG \u2014 always print pointer values\n        ESP_LOGI(TAG, \"WR: %d  RD: %d  samples: %d\", wr_ptr, rd_ptr, num_samples);\n\n        for (int s = 0; s < num_samples; s++) {\n            err = max30102_read_fifo(&red, &ir);\n            if (err != ESP_OK) break;\n\n            ESP_LOGI(TAG, \"RAW IR: %lu  RED: %lu\", ir, red);\n\n            if (ir > FINGER_THRESHOLD) {\n                ir_buffer[buffer_index++] = ir;\n\n                if (buffer_index >= SAMPLE_BUFFER_SIZE) {\n                    buffer_index = 0;\n                    bpm = calculate_bpm(ir_buffer, SAMPLE_BUFFER_SIZE);\n\n                    if (bpm > 0) {\n                        bpm_history[bpm_history_index++ % 5] = bpm;\n                        int bpm_avg = 0;\n                        int count = 0;\n                        for (int i = 0; i < 5; i++) {\n                            if (bpm_history[i] > 0) {\n                                bpm_avg += bpm_history[i];\n                                count++;\n                            }\n                        }\n                        bpm_avg = count > 0 ? bpm_avg / count : 0;\n                        ESP_LOGI(TAG, \"BPM: %d (avg: %d)\", bpm, bpm_avg);\n                        display_raw(oled, bpm_avg, ir);\n                    } else {\n                        display_raw(oled, 0, ir);\n                    }\n                }\n            } else {\n                buffer_index = 0;\n                display_raw(oled, 0, 0);\n                ESP_LOGI(TAG, \"No finger\");\n            }\n        }\n\n        vTaskDelay(pdMS_TO_TICKS(SAMPLE_RATE_MS));\n    }\n}"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\idf_component.yml",
+            "tags": [
+                "hal"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "## IDF Component Manager Manifest File\ndependencies:\n  ## Required IDF version\n  idf:\n    version: '>=4.1.0'\n  # # Put list of dependencies here\n  # # For components maintained by Espressif:\n  # component: \"~1.0.0\"\n  # # For 3rd party components:\n  # username/component: \">=1.0.0,<2.0.0\"\n  # username2/component2:\n  #   version: \"~1.0.0\"\n  #   # For transient dependencies `public` flag can be set.\n  #   # `public` flag doesn't have an effect dependencies of the `main` component.\n  #   # All dependencies of `main` are public by default.\n  #   public: true\n  espressif/ssd1306: '*'\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\CHECKSUMS.json",
+            "tags": [],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "{\"version\": \"1.0\", \"algorithm\": \"sha256\", \"created_at\": \"2025-05-21T16:32:22.148542+00:00\", \"files\": [{\"path\": \"ssd1306.c\", \"size\": 11491, \"hash\": \"cc4e162275b90d05563410c19a9c7517e967d58669e760089b194dcfe03da645\"}, {\"path\": \"CMakeLists.txt\", \"size\": 114, \"hash\": \"8c02b237e3acbe1ff3021b448e6a7cd75d879eb635672893bded79e66c1e1734\"}, {\"path\": \"idf_component.yml\", \"size\": 215, \"hash\": \"402fa3d9440a3e0b71a90cbd2da693e4ba210f9315cc26f19374af42ee9b5b82\"}, {\"path\": \"ssd1306_fonts.c\", \"size\": 30495, \"hash\": \"4ae0926f0fcbca3c908f15e0afa832509d891a1d56fe4452a1b3f83740925b18\"}, {\"path\": \"README.md\", \"size\": 204, \"hash\": \"9a9067dd5fb56e7a4be3f8c604669f495f9121296f6ae85b652a0fdf066da0bc\"}, {\"path\": \"license.txt\", \"size\": 11358, \"hash\": \"cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30\"}, {\"path\": \"include/ssd1306.h\", \"size\": 5330, \"hash\": \"d0f2065db6ffc100a25cb41466cd5562b84768dc681983d45169f2d6c673f957\"}, {\"path\": \"include/ssd1306_fonts.h\", \"size\": 919, \"hash\": \"09a1b4510ee16570eb0ff81c01286d518c7fcf6ad5594fd7916d061ccfb2d5cf\"}]}"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\CMakeLists.txt",
+            "tags": [
+                "build_system"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "idf_component_register(\n    SRCS \"ssd1306.c\" \"ssd1306_fonts.c\"\n    INCLUDE_DIRS \"include\"\n    REQUIRES \"driver\"\n)\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\idf_component.yml",
+            "tags": [
+                "hal"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "dependencies:\n  idf:\n    version: '>=4.0'\ndescription: I2C driver for SSD1306 OLED display\nurl: https://github.com/espressif/esp-bsp/tree/1452b261c778453c32a98fe897b571561db95bb5/components/ssd1306\nversion: 1.0.5~1\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\license.txt",
+            "tags": [],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is granting the License.\n\n      \"Legal Entity\" shall mean the union of the acting entity and all\n      other entities that control, are controlled by, or are under common\n      control with that entity. For the purposes of this definition,\n      \"control\" means (i) the power, direct or indirect, to cause the\n      direction or management of such entity, whether by contract or\n      otherwise, or (ii) ownership of fifty percent (50%) or more of the\n      outstanding shares, or (iii) beneficial ownership of such entity.\n\n      \"You\" (or \"Your\") shall mean an individual or Legal Entity\n      exercising permissions granted by this License.\n\n      \"Source\" form shall mean the preferred form for making modifications,\n      including but not limited to software source code, documentation\n      source, and configuration files.\n\n      \"Object\" form shall mean any form resulting from mechanical\n      transformation or translation of a Source form, including but\n      not limited to compiled object code, generated documentation,\n      and conversions to other media types.\n\n      \"Work\" shall mean the work of authorship, whether in Source or\n      Object form, made available under the License, as indicated by a\n      copyright notice that is included in or attached to the work\n      (an example is provided in the Appendix below).\n\n      \"Derivative Works\" shall mean any work, whether in Source or Object\n      form, that is based on (or derived from) the Work and for which the\n      editorial revisions, annotations, elaborations, or other modifications\n      represent, as a whole, an original work of authorship. For the purposes\n      of this License, Derivative Works shall not include works that remain\n      separable from, or merely link (or bind by name) to the interfaces of,\n      the Work and Derivative Works thereof.\n\n      \"Contribution\" shall mean any work of authorship, including\n      the original version of the Work and any modifications or additions\n      to that Work or Derivative Works thereof, that is intentionally\n      submitted to Licensor for inclusion in the Work by the copyright owner\n      or by an individual or Legal Entity authorized to submit on behalf of\n      the copyright owner. For the purposes of this definition, \"submitted\"\n      means any form of electronic, verbal, or written communication sent\n      to the Licensor or its representatives, including but not limited to\n      communication on electronic mailing lists, source code control systems,\n      and issue tracking systems that are managed by, or on behalf of, the\n      Licensor for the purpose of discussing and improving the Work, but\n      excluding communication that is conspicuously marked or otherwise\n      designated in writing by the copyright owner as \"Not a Contribution.\"\n\n      \"Contributor\" shall mean Licensor and any individual or Legal Entity\n      on behalf of whom a Contribution has been received by Licensor and\n      subsequently incorporated within the Work.\n\n   2. Grant of Copyright License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      copyright license to reproduce, prepare Derivative Works of,\n      publicly display, publicly perform, sublicense, and distribute the\n      Work and such Derivative Works in Source or Object form.\n\n   3. Grant of Patent License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      (except as stated in this section) patent license to make, have made,\n      use, offer to sell, sell, import, and otherwise transfer the Work,\n      where such license applies only to those patent claims licensable\n      by such Contributor that are necessarily infringed by their\n      Contribution(s) alone or by combination of their Contribution(s)\n      with the Work to which such Contribution(s) was submitted. If You\n      institute patent litigation against any entity (including a\n      cross-claim or counterclaim in a lawsuit) alleging that the Work\n      or a Contribution incorporated within the Work constitutes direct\n      or contributory patent infringement, then any patent licenses\n      granted to You under this License for that Work shall terminate\n      as of the date such litigation is filed.\n\n   4. Redistribution. You may reproduce and distribute copies of the\n      Work or Derivative Works thereof in any medium, with or without\n      modifications, and in Source or Object form, provided that You\n      meet the following conditions:\n\n      (a) You must give any other recipients of the Work or\n          Derivative Works a copy of this License; and\n\n      (b) You must cause any modified files to carry prominent notices\n          stating that You changed the files; and\n\n      (c) You must retain, in the Source form of any Derivative Works\n          that You distribute, all copyright, patent, trademark, and\n          attribution notices from the Source form of the Work,\n          excluding those notices that do not pertain to any part of\n          the Derivative Works; and\n\n      (d) If the Work includes a \"NOTICE\" text file as part of its\n          distribution, then any Derivative Works that You distribute must\n          include a readable copy of the attribution notices contained\n          within such NOTICE file, excluding those notices that do not\n          pertain to any part of the Derivative Works, in at least one\n          of the following places: within a NOTICE text file distributed\n          as part of the Derivative Works; within the Source form or\n          documentation, if provided along with the Derivative Works; or,\n          within a display generated by the Derivative Works, if and\n          wherever such third-party notices normally appear. The contents\n          of the NOTICE file are for informational purposes only and\n          do not modify the License. You may add Your own attribution\n          notices within Derivative Works that You distribute, alongside\n          or as an addendum to the NOTICE text from the Work, provided\n          that such additional attribution notices cannot be construed\n          as modifying the License.\n\n      You may add Your own copyright statement to Your modifications and\n      may provide additional or different license terms and conditions\n      for use, reproduction, or distribution of Your modifications, or\n      for any such Derivative Works as a whole, provided Your use,\n      reproduction, and distribution of the Work otherwise complies with\n      the conditions stated in this License.\n\n   5. Submission of Contributions. Unless You explicitly state otherwise,\n      any Contribution intentionally submitted for inclusion in the Work\n      by You to the Licensor shall be under the terms and conditions of\n      this License, without any additional terms or conditions.\n      Notwithstanding the above, nothing herein shall supersede or modify\n      the terms of any separate license agreement you may have executed\n      with Licensor regarding such Contributions.\n\n   6. Trademarks. This License does not grant permission to use the trade\n      names, trademarks, service marks, or product names of the Licensor,\n      except as required for reasonable and customary use in describing the\n      origin of the Work and reproducing the content of the NOTICE file.\n\n   7. Disclaimer of Warranty. Unless required by applicable law or\n      agreed to in writing, Licensor provides the Work (and each\n      Contributor provides its Contributions) on an \"AS IS\" BASIS,\n      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n      implied, including, without limitation, any warranties or conditions\n      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\n      PARTICULAR PURPOSE. You are solely responsible for determining the\n      appropriateness of using or redistributing the Work and assume any\n      risks associated with Your exercise of permissions under this License.\n\n   8. Limitation of Liability. In no event and under no legal theory,\n      whether in tort (including negligence), contract, or otherwise,\n      unless required by applicable law (such as deliberate and grossly\n      negligent acts) or agreed to in writing, shall any Contributor be\n      liable to You for damages, including any direct, indirect, special,\n      incidental, or consequential damages of any character arising as a\n      result of this License or out of the use or inability to use the\n      Work (including but not limited to damages for loss of goodwill,\n      work stoppage, computer failure or malfunction, or any and all\n      other commercial damages or losses), even if such Contributor\n      has been advised of the possibility of such damages.\n\n   9. Accepting Warranty or Additional Liability. While redistributing\n      the Work or Derivative Works thereof, You may choose to offer,\n      and charge a fee for, acceptance of support, warranty, indemnity,\n      or other liability obligations and/or rights consistent with this\n      License. However, in accepting such obligations, You may act only\n      on Your own behalf and on Your sole responsibility, not on behalf\n      of any other Contributor, and only if You agree to indemnify,\n      defend, and hold each Contributor harmless for any liability\n      incurred by, or claims asserted against, such Contributor by reason\n      of your accepting any such warranty or additional liability.\n\n   END OF TERMS AND CONDITIONS\n\n   APPENDIX: How to apply the Apache License to your work.\n\n      To apply the Apache License to your work, attach the following\n      boilerplate notice, with the fields enclosed by brackets \"[]\"\n      replaced with your own identifying information. (Don't include\n      the brackets!)  The text should be enclosed in the appropriate\n      comment syntax for the file format. We also recommend that a\n      file or class name and description of purpose be included on the\n      same \"printed page\" as the copyright notice for easier\n      identification within third-party archives.\n\n   Copyright [yyyy] [name of copyright owner]\n\n   Licensed under the Apache License, Version 2.0 (the \"License\");\n   you may not use this file except in compliance with the License.\n   You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n   Unless required by applicable law or agreed to in writing, software\n   distributed under the License is distributed on an \"AS IS\" BASIS,\n   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n   See the License for the specific language governing permissions and\n   limitations under the License.\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\README.md",
+            "tags": [
+                "hal"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "# Component: SSD1306\n\n**This driver is DEPRECATED. Please use updated SSD1306 driver from [ESP-IDF](https://github.com/espressif/esp-idf/blob/master/components/esp_lcd/include/esp_lcd_panel_ssd1306.h).**\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "tags": [
+                "source",
+                "hal"
+            ],
+            "classes": [],
+            "functions": [
+                "ssd1306_write_data",
+                "ssd1306_write_cmd_byte",
+                "ssd1306_draw_num",
+                "ssd1306_draw_string",
+                "ssd1306_draw_1616char",
+                "ssd1306_draw_bitmap",
+                "ssd1306_init",
+                "ssd1306_delete",
+                "_pow",
+                "ssd1306_write_cmd",
+                "ssd1306_fill_rectangle",
+                "ssd1306_draw_char",
+                "ssd1306_fill_point",
+                "ssd1306_draw_3216char",
+                "ssd1306_draw_line",
+                "ssd1306_create",
+                "ssd1306_refresh_gram",
+                "ssd1306_clear_screen"
+            ],
+            "includes": [],
+            "included_by": [],
+            "text": "/*\n * SPDX-FileCopyrightText: 2015-2023 Espressif Systems (Shanghai) CO LTD\n *\n * SPDX-License-Identifier: Apache-2.0\n */\n\n#include \"driver/i2c.h\"\n#include \"ssd1306.h\"\n#include \"string.h\" // for memset\n\n#define SSD1306_WRITE_CMD           (0x00)\n#define SSD1306_WRITE_DAT           (0x40)\n\n#define COORDINATE_SWAP(x1, x2, y1, y2)  { int16_t temp = x1; x1 = x2, x2 = temp; \\\n                                                   temp = y1; y1 = y2; y2 = temp; }\n\ntypedef struct {\n    i2c_port_t bus;\n    uint16_t dev_addr;\n    uint8_t s_chDisplayBuffer[128][8];\n} ssd1306_dev_t;\n\nstatic uint32_t _pow(uint8_t m, uint8_t n)\n{\n    uint32_t result = 1;\n    while (n--) {\n        result *= m;\n    }\n    return result;\n}\n\nstatic esp_err_t ssd1306_write_data(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    esp_err_t ret;\n\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    ret = i2c_master_start(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, device->dev_addr | I2C_MASTER_WRITE, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, SSD1306_WRITE_DAT, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write(cmd, data, data_len, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_stop(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_cmd_begin(device->bus, cmd, 1000 / portTICK_PERIOD_MS);\n    i2c_cmd_link_delete(cmd);\n\n    return ret;\n}\n\nstatic esp_err_t ssd1306_write_cmd(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    esp_err_t ret;\n\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    ret = i2c_master_start(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, device->dev_addr | I2C_MASTER_WRITE, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, SSD1306_WRITE_CMD, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write(cmd, data, data_len, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_stop(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_cmd_begin(device->bus, cmd, 1000 / portTICK_PERIOD_MS);\n    i2c_cmd_link_delete(cmd);\n\n    return ret;\n}\n\nstatic inline esp_err_t ssd1306_write_cmd_byte(ssd1306_handle_t dev, const uint8_t cmd)\n{\n    return ssd1306_write_cmd(dev, &cmd, 1);\n}\n\nvoid ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1,\n                            uint8_t chYpos1, uint8_t chXpos2, uint8_t chYpos2, uint8_t chDot)\n{\n    uint8_t chXpos, chYpos;\n\n    for (chXpos = chXpos1; chXpos <= chXpos2; chXpos++) {\n        for (chYpos = chYpos1; chYpos <= chYpos2; chYpos++) {\n            ssd1306_fill_point(dev, chXpos, chYpos, chDot);\n        }\n    }\n}\n\nvoid ssd1306_draw_num(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                      uint32_t chNum, uint8_t chLen, uint8_t chSize)\n{\n    uint8_t i;\n    uint8_t chTemp, chShow = 0;\n\n    for (i = 0; i < chLen; i++) {\n        chTemp = (chNum / _pow(10, chLen - i - 1)) % 10;\n        if (chShow == 0 && i < (chLen - 1)) {\n            if (chTemp == 0) {\n                ssd1306_draw_char(dev, chXpos + (chSize / 2) * i, chYpos,\n                                  ' ', chSize, 1);\n                continue;\n            } else {\n                chShow = 1;\n            }\n        }\n        ssd1306_draw_char(dev, chXpos + (chSize / 2) * i, chYpos,\n                          chTemp + '0', chSize, 1);\n    }\n}\n\nvoid ssd1306_draw_char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                       uint8_t chChr, uint8_t chSize, uint8_t chMode)\n{\n    uint8_t i, j;\n    uint8_t chTemp, chYpos0 = chYpos;\n\n    chChr = chChr - ' ';\n    for (i = 0; i < chSize; i++) {\n        if (chSize == 12) {\n            if (chMode) {\n                chTemp = c_chFont1206[chChr][i];\n            } else {\n                chTemp = ~c_chFont1206[chChr][i];\n            }\n        } else {\n            if (chMode) {\n                chTemp = c_chFont1608[chChr][i];\n            } else {\n                chTemp = ~c_chFont1608[chChr][i];\n            }\n        }\n\n        for (j = 0; j < 8; j++) {\n            if (chTemp & 0x80) {\n                ssd1306_fill_point(dev, chXpos, chYpos, 1);\n            } else {\n                ssd1306_fill_point(dev, chXpos, chYpos, 0);\n            }\n            chTemp <<= 1;\n            chYpos++;\n\n            if ((chYpos - chYpos0) == chSize) {\n                chYpos = chYpos0;\n                chXpos++;\n                break;\n            }\n        }\n    }\n}\n\nvoid ssd1306_draw_string(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                         const uint8_t *pchString, uint8_t chSize, uint8_t chMode)\n{\n    while (*pchString != '\\0') {\n        if (chXpos > (SSD1306_WIDTH - chSize / 2)) {\n            chXpos = 0;\n            chYpos += chSize;\n            if (chYpos > (SSD1306_HEIGHT - chSize)) {\n                chYpos = chXpos = 0;\n                ssd1306_clear_screen(dev, 0x00);\n            }\n        }\n        ssd1306_draw_char(dev, chXpos, chYpos, *pchString, chSize, chMode);\n        chXpos += chSize / 2;\n        pchString++;\n    }\n}\n\nvoid ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chPoint)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    uint8_t chPos, chBx, chTemp = 0;\n\n    if (chXpos > 127 || chYpos > 63) {\n        return;\n    }\n    chPos = 7 - chYpos / 8;\n    chBx = chYpos % 8;\n    chTemp = 1 << (7 - chBx);\n\n    if (chPoint) {\n        device->s_chDisplayBuffer[chXpos][chPos] |= chTemp;\n    } else {\n        device->s_chDisplayBuffer[chXpos][chPos] &= ~chTemp;\n    }\n}\n\nvoid ssd1306_draw_1616char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar)\n{\n    uint8_t i, j;\n    uint8_t chTemp = 0, chYpos0 = chYpos, chMode = 0;\n\n    for (i = 0; i < 32; i++) {\n        chTemp = c_chFont1612[chChar - 0x30][i];\n        for (j = 0; j < 8; j++) {\n            chMode = chTemp & 0x80 ? 1 : 0;\n            ssd1306_fill_point(dev, chXpos, chYpos, chMode);\n            chTemp <<= 1;\n            chYpos++;\n            if ((chYpos - chYpos0) == 16) {\n                chYpos = chYpos0;\n                chXpos++;\n                break;\n            }\n        }\n    }\n}\n\nvoid ssd1306_draw_3216char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar)\n{\n    uint8_t i, j;\n    uint8_t chTemp = 0, chYpos0 = chYpos, chMode = 0;\n\n    for (i = 0; i < 64; i++) {\n        chTemp = c_chFont3216[chChar - 0x30][i];\n        for (j = 0; j < 8; j++) {\n            chMode = chTemp & 0x80 ? 1 : 0;\n            ssd1306_fill_point(dev, chXpos, chYpos, chMode);\n            chTemp <<= 1;\n            chYpos++;\n            if ((chYpos - chYpos0) == 32) {\n                chYpos = chYpos0;\n                chXpos++;\n                break;\n            }\n        }\n    }\n}\n\nvoid ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                         const uint8_t *pchBmp, uint8_t chWidth, uint8_t chHeight)\n{\n    uint16_t i, j, byteWidth = (chWidth + 7) / 8;\n\n    for (j = 0; j < chHeight; j++) {\n        for (i = 0; i < chWidth; i++) {\n            if (*(pchBmp + j * byteWidth + i / 8) & (128 >> (i & 7))) {\n                ssd1306_fill_point(dev, chXpos + i, chYpos + j, 1);\n            }\n        }\n    }\n}\n\nvoid ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, int16_t chXpos2, int16_t chYpos2)\n{\n    // 16-bit variables allowing a display overflow effect\n    int16_t x_len = abs(chXpos1 - chXpos2);\n    int16_t y_len = abs(chYpos1 - chYpos2);\n\n    if (y_len < x_len) {\n        if (chXpos1 > chXpos2) {\n            COORDINATE_SWAP(chXpos1, chXpos2, chYpos1, chYpos2);\n        }\n        int16_t len = x_len;\n        int16_t diff = y_len;\n\n        do {\n            if (diff >= x_len) {\n                diff -= x_len;\n                if (chYpos1 < chYpos2) {\n                    chYpos1++;\n                } else {\n                    chYpos1--;\n                }\n            }\n\n            diff += y_len;\n            ssd1306_fill_point(dev, chXpos1++, chYpos1, 1);\n        } while (len--);\n    }\n\n    else {\n        if (chYpos1 > chYpos2) {\n            COORDINATE_SWAP(chXpos1, chXpos2, chYpos1, chYpos2);\n        }\n        int16_t len = y_len;\n        int16_t diff = x_len;\n\n        do {\n            if (diff >= y_len) {\n                diff -= y_len;\n                if (chXpos1 < chXpos2) {\n                    chXpos1++;\n                } else {\n                    chXpos1--;\n                }\n            }\n\n            diff += x_len;\n            ssd1306_fill_point(dev, chXpos1, chYpos1++, 1);\n        } while (len--);\n    }\n}\n\nesp_err_t ssd1306_init(ssd1306_handle_t dev)\n{\n    esp_err_t ret;\n\n    ssd1306_write_cmd_byte(dev, 0xAE); //--turn off oled panel\n    ssd1306_write_cmd_byte(dev, 0x40); //--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)\n    ssd1306_write_cmd_byte(dev, 0x81); //--set contrast control register\n    ssd1306_write_cmd_byte(dev, 0xCF); // Set SEG Output Current Brightness\n    ssd1306_write_cmd_byte(dev, 0xA1); //--Set SEG/Column Mapping\n    ssd1306_write_cmd_byte(dev, 0xC0); //Set COM/Row Scan Direction\n    ssd1306_write_cmd_byte(dev, 0xA6); //--set normal display\n    ssd1306_write_cmd_byte(dev, 0xA8); //--set multiplex ratio(1 to 64)\n    ssd1306_write_cmd_byte(dev, 0x3f); //--1/64 duty\n    ssd1306_write_cmd_byte(dev, 0xd5); //--set display clock divide ratio/oscillator frequency\n    ssd1306_write_cmd_byte(dev, 0x80); //--set divide ratio, Set Clock as 100 Frames/Sec\n    ssd1306_write_cmd_byte(dev, 0xD9); //--set pre-charge period\n    ssd1306_write_cmd_byte(dev, 0xF1); //Set Pre-Charge as 15 Clocks & Discharge as 1 Clock\n    ssd1306_write_cmd_byte(dev, 0xDA); //--set com pins hardware configuration\n    ssd1306_write_cmd_byte(dev, 0xDB); //--set vcomh\n    ssd1306_write_cmd_byte(dev, 0x40); //Set VCOM Deselect Level\n    ssd1306_write_cmd_byte(dev, 0x8D); //--set Charge Pump enable/disable\n    ssd1306_write_cmd_byte(dev, 0x14); //--set(0x10) disable\n    ssd1306_write_cmd_byte(dev, 0xA4); // Disable Entire Display On (0xa4/0xa5)\n    ssd1306_write_cmd_byte(dev, 0xA6); // Disable Inverse Display On (0xa6/a7)\n\n    const uint8_t cmd[2] = {0x20, 1}; //-- set vertical adressing mode\n    ssd1306_write_cmd(dev, cmd, sizeof(cmd));\n\n    uint8_t cmd2[3] = {0x21, 0, 127};\n    ssd1306_write_cmd(dev, cmd2, sizeof(cmd2)); //--set column address to zero\n    cmd2[0] = 0x22;\n    cmd2[2] = 7;\n    ssd1306_write_cmd(dev, cmd2, sizeof(cmd2)); //--set row address to zero\n\n    ret = ssd1306_write_cmd_byte(dev, 0xAF); //--turn on oled panel\n\n    ssd1306_clear_screen(dev, 0x00);\n    return ret;\n}\n\nssd1306_handle_t ssd1306_create(i2c_port_t bus, uint16_t dev_addr)\n{\n    ssd1306_dev_t *dev = (ssd1306_dev_t *) calloc(1, sizeof(ssd1306_dev_t));\n    dev->bus = bus;\n    dev->dev_addr = dev_addr << 1;\n    ssd1306_init((ssd1306_handle_t) dev);\n    return (ssd1306_handle_t) dev;\n}\n\nvoid ssd1306_delete(ssd1306_handle_t dev)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    free(device);\n}\n\nesp_err_t ssd1306_refresh_gram(ssd1306_handle_t dev)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    return ssd1306_write_data(dev, &device->s_chDisplayBuffer[0][0], sizeof(device->s_chDisplayBuffer));\n}\n\nvoid ssd1306_clear_screen(ssd1306_handle_t dev, uint8_t chFill)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    memset(device->s_chDisplayBuffer, chFill, sizeof(device->s_chDisplayBuffer));\n}\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306_fonts.c",
+            "tags": [
+                "source",
+                "hal"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "/*\n * SPDX-FileCopyrightText: 2023 Espressif Systems (Shanghai) CO LTD\n *\n * SPDX-License-Identifier: Apache-2.0\n */\n#include \"ssd1306_fonts.h\"\n\nconst uint8_t c_chFont1206[95][12] = { {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },/*\" \",0*/\n    { 0x00, 0x00, 0x00, 0x00, 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\"!\",1*/\n    { 0x00, 0x00, 0x30, 0x00, 0x40, 0x00, 0x30, 0x00, 0x40, 0x00, 0x00, 0x00 },/*\"\"\",2*/\n    { 0x09, 0x00, 0x0B, 0xC0, 0x3D, 0x00, 0x0B, 0xC0, 0x3D, 0x00, 0x09, 0x00 },/*\"#\",3*/\n    { 0x18, 0xC0, 0x24, 0x40, 0x7F, 0xE0, 0x22, 0x40, 0x31, 0x80, 0x00, 0x00 },/*\"$\",4*/\n    { 0x18, 0x00, 0x24, 0xC0, 0x1B, 0x00, 0x0D, 0x80, 0x32, 0x40, 0x01, 0x80 },/*\"%\",5*/\n    { 0x03, 0x80, 0x1C, 0x40, 0x27, 0x40, 0x1C, 0x80, 0x07, 0x40, 0x00, 0x40 },/*\"&\",6*/\n    { 0x10, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\"'\",7*/\n    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x80, 0x20, 0x40, 0x40, 0x20 },/*\"(\",8*/\n    { 0x00, 0x00, 0x40, 0x20, 0x20, 0x40, 0x1F, 0x80, 0x00, 0x00, 0x00, 0x00 },/*\")\",9*/\n    { 0x09, 0x00, 0x06, 0x00, 0x1F, 0x80, 0x06, 0x00, 0x09, 0x00, 0x00, 0x00 },/*\"*\",10*/\n    { 0x04, 0x00, 0x04, 0x00, 0x3F, 0x80, 0x04, 0x00, 0x04, 0x00, 0x00, 0x00 },/*\"+\",11*/\n    { 0x00, 0x10, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\",\",12*/\n    { 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x00, 0x00 },/*\"-\",13*/\n    { 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\".\",14*/\n    { 0x00, 0x20, 0x01, 0xC0, 0x06, 0x00, 0x38, 0x00, 0x40, 0x00, 0x00, 0x00 },/*\"/\",15*/\n    { 0x1F, 0x80, 0x20, 0x40, 0x20, 0x40, 0x20, 0x40, 0x1F, 0x80, 0x00, 0x00 },/*\"0\",16*/\n    { 0x00, 0x00, 0x10, 0x40, 0x3F, 0xC0, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00 },/*\"1\",17*/\n    { 0x18, 0xC0, 0x21, 0x40, 0x22, 0x40, 0x24, 0x40, 0x18, 0x40, 0x00, 0x00 },/*\"2\",18*/\n    { 0x10, 0x80, 0x20, 0x40, 0x24, 0x40, 0x24, 0x40, 0x1B, 0x80, 0x00, 0x00 },/*\"3\",19*/\n    { 0x02, 0x00, 0x0D, 0x00, 0x11, 0x00, 0x3F, 0xC0, 0x01, 0x40, 0x00, 0x00 },/*\"4\",20*/\n    { 0x3C, 0x80, 0x24, 0x40, 0x24, 0x40, 0x24, 0x40, 0x23, 0x80, 0x00, 0x00 },/*\"5\",21*/\n    { 0x1F, 0x80, 0x24, 0x40, 0x24, 0x40, 0x34, 0x40, 0x03, 0x80, 0x00, 0x00 },/*\"6\",22*/\n    { 0x30, 0x00, 0x20, 0x00, 0x27, 0xC0, 0x38, 0x00, 0x20, 0x00, 0x00, 0x00 },/*\"7\",23*/\n    { 0x1B, 0x80, 0x24, 0x40, 0x24, 0x40, 0x24, 0x40, 0x1B, 0x80, 0x00, 0x00 },/*\"8\",24*/\n    { 0x1C, 0x00, 0x22, 0xC0, 0x22, 0x40, 0x22, 0x40, 0x1F, 0x80, 0x00, 0x00 },/*\"9\",25*/\n    { 0x00, 0x00, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\":\",26*/\n    { 0x00, 0x00, 0x00, 0x00, 0x04, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\";\",27*/\n    { 0x00, 0x00, 0x04, 0x00, 0x0A, 0x00, 0x11, 0x00, 0x20, 0x80, 0x40, 0x40 },/*\"<\",28*/\n    { 0x09, 0x00, 0x09, 0x00, 0x09, 0x00, 0x09, 0x00, 0x09, 0x00, 0x00, 0x00 },/*\"=\",29*/\n    { 0x00, 0x00, 0x40, 0x40, 0x20, 0x80, 0x11, 0x00, 0x0A, 0x00, 0x04, 0x00 },/*\">\",30*/\n    { 0x18, 0x00, 0x20, 0x00, 0x23, 0x40, 0x24, 0x00, 0x18, 0x00, 0x00, 0x00 },/*\"?\",31*/\n    { 0x1F, 0x80, 0x20, 0x40, 0x27, 0x40, 0x29, 0x40, 0x1F, 0x40, 0x00, 0x00 },/*\"@\",32*/\n    { 0x00, 0x40, 0x07, 0xC0, 0x39, 0x00, 0x0F, 0x00, 0x01, 0xC0, 0x00, 0x40 },/*\"A\",33*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x24, 0x40, 0x24, 0x40, 0x1B, 0x80, 0x00, 0x00 },/*\"B\",34*/\n    { 0x1F, 0x80, 0x20, 0x40, 0x20, 0x40, 0x20, 0x40, 0x30, 0x80, 0x00, 0x00 },/*\"C\",35*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x20, 0x40, 0x20, 0x40, 0x1F, 0x80, 0x00, 0x00 },/*\"D\",36*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x24, 0x40, 0x2E, 0x40, 0x30, 0xC0, 0x00, 0x00 },/*\"E\",37*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x24, 0x40, 0x2E, 0x00, 0x30, 0x00, 0x00, 0x00 },/*\"F\",38*/\n    { 0x0F, 0x00, 0x10, 0x80, 0x20, 0x40, 0x22, 0x40, 0x33, 0x80, 0x02, 0x00 },/*\"G\",39*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x04, 0x00, 0x04, 0x00, 0x3F, 0xC0, 0x20, 0x40 },/*\"H\",40*/\n    { 0x20, 0x40, 0x20, 0x40, 0x3F, 0xC0, 0x20, 0x40, 0x20, 0x40, 0x00, 0x00 },/*\"I\",41*/\n    { 0x00, 0x60, 0x20, 0x20, 0x20, 0x20, 0x3F, 0xC0, 0x20, 0x00, 0x20, 0x00 },/*\"J\",42*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x24, 0x40, 0x0B, 0x00, 0x30, 0xC0, 0x20, 0x40 },/*\"K\",43*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x20, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0xC0 },/*\"L\",44*/\n    { 0x3F, 0xC0, 0x3C, 0x00, 0x03, 0xC0, 0x3C, 0x00, 0x3F, 0xC0, 0x00, 0x00 },/*\"M\",45*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x0C, 0x40, 0x23, 0x00, 0x3F, 0xC0, 0x20, 0x00 },/*\"N\",46*/\n    { 0x1F, 0x80, 0x20, 0x40, 0x20, 0x40, 0x20, 0x40, 0x1F, 0x80, 0x00, 0x00 },/*\"O\",47*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x24, 0x40, 0x24, 0x00, 0x18, 0x00, 0x00, 0x00 },/*\"P\",48*/\n    { 0x1F, 0x80, 0x21, 0x40, 0x21, 0x40, 0x20, 0xE0, 0x1F, 0xA0, 0x00, 0x00 },/*\"Q\",49*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x24, 0x40, 0x26, 0x00, 0x19, 0xC0, 0x00, 0x40 },/*\"R\",50*/\n    { 0x18, 0xC0, 0x24, 0x40, 0x24, 0x40, 0x22, 0x40, 0x31, 0x80, 0x00, 0x00 },/*\"S\",51*/\n    { 0x30, 0x00, 0x20, 0x40, 0x3F, 0xC0, 0x20, 0x40, 0x30, 0x00, 0x00, 0x00 },/*\"T\",52*/\n    { 0x20, 0x00, 0x3F, 0x80, 0x00, 0x40, 0x00, 0x40, 0x3F, 0x80, 0x20, 0x00 },/*\"U\",53*/\n    { 0x20, 0x00, 0x3E, 0x00, 0x01, 0xC0, 0x07, 0x00, 0x38, 0x00, 0x20, 0x00 },/*\"V\",54*/\n    { 0x38, 0x00, 0x07, 0xC0, 0x3C, 0x00, 0x07, 0xC0, 0x38, 0x00, 0x00, 0x00 },/*\"W\",55*/\n    { 0x20, 0x40, 0x39, 0xC0, 0x06, 0x00, 0x39, 0xC0, 0x20, 0x40, 0x00, 0x00 },/*\"X\",56*/\n    { 0x20, 0x00, 0x38, 0x40, 0x07, 0xC0, 0x38, 0x40, 0x20, 0x00, 0x00, 0x00 },/*\"Y\",57*/\n    { 0x30, 0x40, 0x21, 0xC0, 0x26, 0x40, 0x38, 0x40, 0x20, 0xC0, 0x00, 0x00 },/*\"Z\",58*/\n    { 0x00, 0x00, 0x00, 0x00, 0x7F, 0xE0, 0x40, 0x20, 0x40, 0x20, 0x00, 0x00 },/*\"[\",59*/\n    { 0x00, 0x00, 0x70, 0x00, 0x0C, 0x00, 0x03, 0x80, 0x00, 0x40, 0x00, 0x00 },/*\"\\\",60*/\n    { 0x00, 0x00, 0x40, 0x20, 0x40, 0x20, 0x7F, 0xE0, 0x00, 0x00, 0x00, 0x00 },/*\"]\",61*/\n    { 0x00, 0x00, 0x20, 0x00, 0x40, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\"^\",62*/\n    { 0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00, 0x10 },/*\"_\",63*/\n    { 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\"`\",64*/\n    { 0x00, 0x00, 0x02, 0x80, 0x05, 0x40, 0x05, 0x40, 0x03, 0xC0, 0x00, 0x40 },/*\"a\",65*/\n    { 0x20, 0x00, 0x3F, 0xC0, 0x04, 0x40, 0x04, 0x40, 0x03, 0x80, 0x00, 0x00 },/*\"b\",66*/\n    { 0x00, 0x00, 0x03, 0x80, 0x04, 0x40, 0x04, 0x40, 0x06, 0x40, 0x00, 0x00 },/*\"c\",67*/\n    { 0x00, 0x00, 0x03, 0x80, 0x04, 0x40, 0x24, 0x40, 0x3F, 0xC0, 0x00, 0x40 },/*\"d\",68*/\n    { 0x00, 0x00, 0x03, 0x80, 0x05, 0x40, 0x05, 0x40, 0x03, 0x40, 0x00, 0x00 },/*\"e\",69*/\n    { 0x00, 0x00, 0x04, 0x40, 0x1F, 0xC0, 0x24, 0x40, 0x24, 0x40, 0x20, 0x00 },/*\"f\",70*/\n    { 0x00, 0x00, 0x02, 0xE0, 0x05, 0x50, 0x05, 0x50, 0x06, 0x50, 0x04, 0x20 },/*\"g\",71*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x04, 0x40, 0x04, 0x00, 0x03, 0xC0, 0x00, 0x40 },/*\"h\",72*/\n    { 0x00, 0x00, 0x04, 0x40, 0x27, 0xC0, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00 },/*\"i\",73*/\n    { 0x00, 0x10, 0x00, 0x10, 0x04, 0x10, 0x27, 0xE0, 0x00, 0x00, 0x00, 0x00 },/*\"j\",74*/\n    { 0x20, 0x40, 0x3F, 0xC0, 0x01, 0x40, 0x07, 0x00, 0x04, 0xC0, 0x04, 0x40 },/*\"k\",75*/\n    { 0x20, 0x40, 0x20, 0x40, 0x3F, 0xC0, 0x00, 0x40, 0x00, 0x40, 0x00, 0x00 },/*\"l\",76*/\n    { 0x07, 0xC0, 0x04, 0x00, 0x07, 0xC0, 0x04, 0x00, 0x03, 0xC0, 0x00, 0x00 },/*\"m\",77*/\n    { 0x04, 0x40, 0x07, 0xC0, 0x04, 0x40, 0x04, 0x00, 0x03, 0xC0, 0x00, 0x40 },/*\"n\",78*/\n    { 0x00, 0x00, 0x03, 0x80, 0x04, 0x40, 0x04, 0x40, 0x03, 0x80, 0x00, 0x00 },/*\"o\",79*/\n    { 0x04, 0x10, 0x07, 0xF0, 0x04, 0x50, 0x04, 0x40, 0x03, 0x80, 0x00, 0x00 },/*\"p\",80*/\n    { 0x00, 0x00, 0x03, 0x80, 0x04, 0x40, 0x04, 0x50, 0x07, 0xF0, 0x00, 0x10 },/*\"q\",81*/\n    { 0x04, 0x40, 0x07, 0xC0, 0x02, 0x40, 0x04, 0x00, 0x04, 0x00, 0x00, 0x00 },/*\"r\",82*/\n    { 0x00, 0x00, 0x06, 0x40, 0x05, 0x40, 0x05, 0x40, 0x04, 0xC0, 0x00, 0x00 },/*\"s\",83*/\n    { 0x00, 0x00, 0x04, 0x00, 0x1F, 0x80, 0x04, 0x40, 0x00, 0x40, 0x00, 0x00 },/*\"t\",84*/\n    { 0x04, 0x00, 0x07, 0x80, 0x00, 0x40, 0x04, 0x40, 0x07, 0xC0, 0x00, 0x40 },/*\"u\",85*/\n    { 0x04, 0x00, 0x07, 0x00, 0x04, 0xC0, 0x01, 0x80, 0x06, 0x00, 0x04, 0x00 },/*\"v\",86*/\n    { 0x06, 0x00, 0x01, 0xC0, 0x07, 0x00, 0x01, 0xC0, 0x06, 0x00, 0x00, 0x00 },/*\"w\",87*/\n    { 0x04, 0x40, 0x06, 0xC0, 0x01, 0x00, 0x06, 0xC0, 0x04, 0x40, 0x00, 0x00 },/*\"x\",88*/\n    { 0x04, 0x10, 0x07, 0x10, 0x04, 0xE0, 0x01, 0x80, 0x06, 0x00, 0x04, 0x00 },/*\"y\",89*/\n    { 0x00, 0x00, 0x04, 0x40, 0x05, 0xC0, 0x06, 0x40, 0x04, 0x40, 0x00, 0x00 },/*\"z\",90*/\n    { 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x7B, 0xE0, 0x40, 0x20, 0x00, 0x00 },/*\"{\",91*/\n    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00 },/*\"|\",92*/\n    { 0x00, 0x00, 0x40, 0x20, 0x7B, 0xE0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 },/*\"}\",93*/\n    { 0x40, 0x00, 0x80, 0x00, 0x40, 0x00, 0x20, 0x00, 0x20, 0x00, 0x40, 0x00 }, /*\"~\",94*/\n};\n\nconst uint8_t c_chFont1608[95][16] = { {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },/*\" \",0*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F, 0xCC, 0x00, 0x0C, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"!\",1*/\n    {\n        0x00, 0x00, 0x08, 0x00, 0x30, 0x00, 0x60, 0x00, 0x08, 0x00, 0x30, 0x00, 0x60,\n        0x00, 0x00, 0x00\n    },/*\"\"\",2*/\n    {\n        0x02, 0x20, 0x03, 0xFC, 0x1E, 0x20, 0x02, 0x20, 0x03, 0xFC, 0x1E, 0x20, 0x02,\n        0x20, 0x00, 0x00\n    },/*\"#\",3*/\n    {\n        0x00, 0x00, 0x0E, 0x18, 0x11, 0x04, 0x3F, 0xFF, 0x10, 0x84, 0x0C, 0x78, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"$\",4*/\n    {\n        0x0F, 0x00, 0x10, 0x84, 0x0F, 0x38, 0x00, 0xC0, 0x07, 0x78, 0x18, 0x84, 0x00,\n        0x78, 0x00, 0x00\n    },/*\"%\",5*/\n    {\n        0x00, 0x78, 0x0F, 0x84, 0x10, 0xC4, 0x11, 0x24, 0x0E, 0x98, 0x00, 0xE4, 0x00,\n        0x84, 0x00, 0x08\n    },/*\"&\",6*/\n    {\n        0x08, 0x00, 0x68, 0x00, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"'\",7*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xE0, 0x18, 0x18, 0x20, 0x04, 0x40,\n        0x02, 0x00, 0x00\n    },/*\"(\",8*/\n    {\n        0x00, 0x00, 0x40, 0x02, 0x20, 0x04, 0x18, 0x18, 0x07, 0xE0, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\")\",9*/\n    {\n        0x02, 0x40, 0x02, 0x40, 0x01, 0x80, 0x0F, 0xF0, 0x01, 0x80, 0x02, 0x40, 0x02,\n        0x40, 0x00, 0x00\n    },/*\"*\",10*/\n    {\n        0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x0F, 0xF8, 0x00, 0x80, 0x00, 0x80, 0x00,\n        0x80, 0x00, 0x00\n    },/*\"+\",11*/\n    {\n        0x00, 0x01, 0x00, 0x0D, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\",\",12*/\n    {\n        0x00, 0x00, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00, 0x80, 0x00,\n        0x80, 0x00, 0x80\n    },/*\"-\",13*/\n    {\n        0x00, 0x00, 0x00, 0x0C, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\".\",14*/\n    {\n        0x00, 0x00, 0x00, 0x06, 0x00, 0x18, 0x00, 0x60, 0x01, 0x80, 0x06, 0x00, 0x18,\n        0x00, 0x20, 0x00\n    },/*\"/\",15*/\n    {\n        0x00, 0x00, 0x07, 0xF0, 0x08, 0x08, 0x10, 0x04, 0x10, 0x04, 0x08, 0x08, 0x07,\n        0xF0, 0x00, 0x00\n    },/*\"0\",16*/\n    {\n        0x00, 0x00, 0x08, 0x04, 0x08, 0x04, 0x1F, 0xFC, 0x00, 0x04, 0x00, 0x04, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"1\",17*/\n    {\n        0x00, 0x00, 0x0E, 0x0C, 0x10, 0x14, 0x10, 0x24, 0x10, 0x44, 0x11, 0x84, 0x0E,\n        0x0C, 0x00, 0x00\n    },/*\"2\",18*/\n    {\n        0x00, 0x00, 0x0C, 0x18, 0x10, 0x04, 0x11, 0x04, 0x11, 0x04, 0x12, 0x88, 0x0C,\n        0x70, 0x00, 0x00\n    },/*\"3\",19*/\n    {\n        0x00, 0x00, 0x00, 0xE0, 0x03, 0x20, 0x04, 0x24, 0x08, 0x24, 0x1F, 0xFC, 0x00,\n        0x24, 0x00, 0x00\n    },/*\"4\",20*/\n    {\n        0x00, 0x00, 0x1F, 0x98, 0x10, 0x84, 0x11, 0x04, 0x11, 0x04, 0x10, 0x88, 0x10,\n        0x70, 0x00, 0x00\n    },/*\"5\",21*/\n    {\n        0x00, 0x00, 0x07, 0xF0, 0x08, 0x88, 0x11, 0x04, 0x11, 0x04, 0x18, 0x88, 0x00,\n        0x70, 0x00, 0x00\n    },/*\"6\",22*/\n    {\n        0x00, 0x00, 0x1C, 0x00, 0x10, 0x00, 0x10, 0xFC, 0x13, 0x00, 0x1C, 0x00, 0x10,\n        0x00, 0x00, 0x00\n    },/*\"7\",23*/\n    {\n        0x00, 0x00, 0x0E, 0x38, 0x11, 0x44, 0x10, 0x84, 0x10, 0x84, 0x11, 0x44, 0x0E,\n        0x38, 0x00, 0x00\n    },/*\"8\",24*/\n    {\n        0x00, 0x00, 0x07, 0x00, 0x08, 0x8C, 0x10, 0x44, 0x10, 0x44, 0x08, 0x88, 0x07,\n        0xF0, 0x00, 0x00\n    },/*\"9\",25*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x0C, 0x03, 0x0C, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\":\",26*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\";\",27*/\n    {\n        0x00, 0x00, 0x00, 0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10,\n        0x04, 0x00, 0x00\n    },/*\"<\",28*/\n    {\n        0x02, 0x20, 0x02, 0x20, 0x02, 0x20, 0x02, 0x20, 0x02, 0x20, 0x02, 0x20, 0x02,\n        0x20, 0x00, 0x00\n    },/*\"=\",29*/\n    {\n        0x00, 0x00, 0x10, 0x04, 0x08, 0x08, 0x04, 0x10, 0x02, 0x20, 0x01, 0x40, 0x00,\n        0x80, 0x00, 0x00\n    },/*\">\",30*/\n    {\n        0x00, 0x00, 0x0E, 0x00, 0x12, 0x00, 0x10, 0x0C, 0x10, 0x6C, 0x10, 0x80, 0x0F,\n        0x00, 0x00, 0x00\n    },/*\"?\",31*/\n    {\n        0x03, 0xE0, 0x0C, 0x18, 0x13, 0xE4, 0x14, 0x24, 0x17, 0xC4, 0x08, 0x28, 0x07,\n        0xD0, 0x00, 0x00\n    },/*\"@\",32*/\n    {\n        0x00, 0x04, 0x00, 0x3C, 0x03, 0xC4, 0x1C, 0x40, 0x07, 0x40, 0x00, 0xE4, 0x00,\n        0x1C, 0x00, 0x04\n    },/*\"A\",33*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x11, 0x04, 0x11, 0x04, 0x11, 0x04, 0x0E, 0x88, 0x00,\n        0x70, 0x00, 0x00\n    },/*\"B\",34*/\n    {\n        0x03, 0xE0, 0x0C, 0x18, 0x10, 0x04, 0x10, 0x04, 0x10, 0x04, 0x10, 0x08, 0x1C,\n        0x10, 0x00, 0x00\n    },/*\"C\",35*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x10, 0x04, 0x10, 0x04, 0x10, 0x04, 0x08, 0x08, 0x07,\n        0xF0, 0x00, 0x00\n    },/*\"D\",36*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x11, 0x04, 0x11, 0x04, 0x17, 0xC4, 0x10, 0x04, 0x08,\n        0x18, 0x00, 0x00\n    },/*\"E\",37*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x11, 0x04, 0x11, 0x00, 0x17, 0xC0, 0x10, 0x00, 0x08,\n        0x00, 0x00, 0x00\n    },/*\"F\",38*/\n    {\n        0x03, 0xE0, 0x0C, 0x18, 0x10, 0x04, 0x10, 0x04, 0x10, 0x44, 0x1C, 0x78, 0x00,\n        0x40, 0x00, 0x00\n    },/*\"G\",39*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x10, 0x84, 0x00, 0x80, 0x00, 0x80, 0x10, 0x84, 0x1F,\n        0xFC, 0x10, 0x04\n    },/*\"H\",40*/\n    {\n        0x00, 0x00, 0x10, 0x04, 0x10, 0x04, 0x1F, 0xFC, 0x10, 0x04, 0x10, 0x04, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"I\",41*/\n    {\n        0x00, 0x03, 0x00, 0x01, 0x10, 0x01, 0x10, 0x01, 0x1F, 0xFE, 0x10, 0x00, 0x10,\n        0x00, 0x00, 0x00\n    },/*\"J\",42*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x11, 0x04, 0x03, 0x80, 0x14, 0x64, 0x18, 0x1C, 0x10,\n        0x04, 0x00, 0x00\n    },/*\"K\",43*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x10, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x00,\n        0x0C, 0x00, 0x00\n    },/*\"L\",44*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x1F, 0x00, 0x00, 0xFC, 0x1F, 0x00, 0x1F, 0xFC, 0x10,\n        0x04, 0x00, 0x00\n    },/*\"M\",45*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x0C, 0x04, 0x03, 0x00, 0x00, 0xE0, 0x10, 0x18, 0x1F,\n        0xFC, 0x10, 0x00\n    },/*\"N\",46*/\n    {\n        0x07, 0xF0, 0x08, 0x08, 0x10, 0x04, 0x10, 0x04, 0x10, 0x04, 0x08, 0x08, 0x07,\n        0xF0, 0x00, 0x00\n    },/*\"O\",47*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x10, 0x84, 0x10, 0x80, 0x10, 0x80, 0x10, 0x80, 0x0F,\n        0x00, 0x00, 0x00\n    },/*\"P\",48*/\n    {\n        0x07, 0xF0, 0x08, 0x18, 0x10, 0x24, 0x10, 0x24, 0x10, 0x1C, 0x08, 0x0A, 0x07,\n        0xF2, 0x00, 0x00\n    },/*\"Q\",49*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x11, 0x04, 0x11, 0x00, 0x11, 0xC0, 0x11, 0x30, 0x0E,\n        0x0C, 0x00, 0x04\n    },/*\"R\",50*/\n    {\n        0x00, 0x00, 0x0E, 0x1C, 0x11, 0x04, 0x10, 0x84, 0x10, 0x84, 0x10, 0x44, 0x1C,\n        0x38, 0x00, 0x00\n    },/*\"S\",51*/\n    {\n        0x18, 0x00, 0x10, 0x00, 0x10, 0x04, 0x1F, 0xFC, 0x10, 0x04, 0x10, 0x00, 0x18,\n        0x00, 0x00, 0x00\n    },/*\"T\",52*/\n    {\n        0x10, 0x00, 0x1F, 0xF8, 0x10, 0x04, 0x00, 0x04, 0x00, 0x04, 0x10, 0x04, 0x1F,\n        0xF8, 0x10, 0x00\n    },/*\"U\",53*/\n    {\n        0x10, 0x00, 0x1E, 0x00, 0x11, 0xE0, 0x00, 0x1C, 0x00, 0x70, 0x13, 0x80, 0x1C,\n        0x00, 0x10, 0x00\n    },/*\"V\",54*/\n    {\n        0x1F, 0xC0, 0x10, 0x3C, 0x00, 0xE0, 0x1F, 0x00, 0x00, 0xE0, 0x10, 0x3C, 0x1F,\n        0xC0, 0x00, 0x00\n    },/*\"W\",55*/\n    {\n        0x10, 0x04, 0x18, 0x0C, 0x16, 0x34, 0x01, 0xC0, 0x01, 0xC0, 0x16, 0x34, 0x18,\n        0x0C, 0x10, 0x04\n    },/*\"X\",56*/\n    {\n        0x10, 0x00, 0x1C, 0x00, 0x13, 0x04, 0x00, 0xFC, 0x13, 0x04, 0x1C, 0x00, 0x10,\n        0x00, 0x00, 0x00\n    },/*\"Y\",57*/\n    {\n        0x08, 0x04, 0x10, 0x1C, 0x10, 0x64, 0x10, 0x84, 0x13, 0x04, 0x1C, 0x04, 0x10,\n        0x18, 0x00, 0x00\n    },/*\"Z\",58*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F, 0xFE, 0x40, 0x02, 0x40, 0x02, 0x40,\n        0x02, 0x00, 0x00\n    },/*\"[\",59*/\n    {\n        0x00, 0x00, 0x30, 0x00, 0x0C, 0x00, 0x03, 0x80, 0x00, 0x60, 0x00, 0x1C, 0x00,\n        0x03, 0x00, 0x00\n    },/*\"\\\",60*/\n    {\n        0x00, 0x00, 0x40, 0x02, 0x40, 0x02, 0x40, 0x02, 0x7F, 0xFE, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"]\",61*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x20,\n        0x00, 0x00, 0x00\n    },/*\"^\",62*/\n    {\n        0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,\n        0x01, 0x00, 0x01\n    },/*\"_\",63*/\n    {\n        0x00, 0x00, 0x40, 0x00, 0x40, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"`\",64*/\n    {\n        0x00, 0x00, 0x00, 0x98, 0x01, 0x24, 0x01, 0x44, 0x01, 0x44, 0x01, 0x44, 0x00,\n        0xFC, 0x00, 0x04\n    },/*\"a\",65*/\n    {\n        0x10, 0x00, 0x1F, 0xFC, 0x00, 0x88, 0x01, 0x04, 0x01, 0x04, 0x00, 0x88, 0x00,\n        0x70, 0x00, 0x00\n    },/*\"b\",66*/\n    {\n        0x00, 0x00, 0x00, 0x70, 0x00, 0x88, 0x01, 0x04, 0x01, 0x04, 0x01, 0x04, 0x00,\n        0x88, 0x00, 0x00\n    },/*\"c\",67*/\n    {\n        0x00, 0x00, 0x00, 0x70, 0x00, 0x88, 0x01, 0x04, 0x01, 0x04, 0x11, 0x08, 0x1F,\n        0xFC, 0x00, 0x04\n    },/*\"d\",68*/\n    {\n        0x00, 0x00, 0x00, 0xF8, 0x01, 0x44, 0x01, 0x44, 0x01, 0x44, 0x01, 0x44, 0x00,\n        0xC8, 0x00, 0x00\n    },/*\"e\",69*/\n    {\n        0x00, 0x00, 0x01, 0x04, 0x01, 0x04, 0x0F, 0xFC, 0x11, 0x04, 0x11, 0x04, 0x11,\n        0x00, 0x18, 0x00\n    },/*\"f\",70*/\n    {\n        0x00, 0x00, 0x00, 0xD6, 0x01, 0x29, 0x01, 0x29, 0x01, 0x29, 0x01, 0xC9, 0x01,\n        0x06, 0x00, 0x00\n    },/*\"g\",71*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x00, 0x84, 0x01, 0x00, 0x01, 0x00, 0x01, 0x04, 0x00,\n        0xFC, 0x00, 0x04\n    },/*\"h\",72*/\n    {\n        0x00, 0x00, 0x01, 0x04, 0x19, 0x04, 0x19, 0xFC, 0x00, 0x04, 0x00, 0x04, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"i\",73*/\n    {\n        0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x01, 0x01, 0x19, 0x01, 0x19, 0xFE, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"j\",74*/\n    {\n        0x10, 0x04, 0x1F, 0xFC, 0x00, 0x24, 0x00, 0x40, 0x01, 0xB4, 0x01, 0x0C, 0x01,\n        0x04, 0x00, 0x00\n    },/*\"k\",75*/\n    {\n        0x00, 0x00, 0x10, 0x04, 0x10, 0x04, 0x1F, 0xFC, 0x00, 0x04, 0x00, 0x04, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"l\",76*/\n    {\n        0x01, 0x04, 0x01, 0xFC, 0x01, 0x04, 0x01, 0x00, 0x01, 0xFC, 0x01, 0x04, 0x01,\n        0x00, 0x00, 0xFC\n    },/*\"m\",77*/\n    {\n        0x01, 0x04, 0x01, 0xFC, 0x00, 0x84, 0x01, 0x00, 0x01, 0x00, 0x01, 0x04, 0x00,\n        0xFC, 0x00, 0x04\n    },/*\"n\",78*/\n    {\n        0x00, 0x00, 0x00, 0xF8, 0x01, 0x04, 0x01, 0x04, 0x01, 0x04, 0x01, 0x04, 0x00,\n        0xF8, 0x00, 0x00\n    },/*\"o\",79*/\n    {\n        0x01, 0x01, 0x01, 0xFF, 0x00, 0x85, 0x01, 0x04, 0x01, 0x04, 0x00, 0x88, 0x00,\n        0x70, 0x00, 0x00\n    },/*\"p\",80*/\n    {\n        0x00, 0x00, 0x00, 0x70, 0x00, 0x88, 0x01, 0x04, 0x01, 0x04, 0x01, 0x05, 0x01,\n        0xFF, 0x00, 0x01\n    },/*\"q\",81*/\n    {\n        0x01, 0x04, 0x01, 0x04, 0x01, 0xFC, 0x00, 0x84, 0x01, 0x04, 0x01, 0x00, 0x01,\n        0x80, 0x00, 0x00\n    },/*\"r\",82*/\n    {\n        0x00, 0x00, 0x00, 0xCC, 0x01, 0x24, 0x01, 0x24, 0x01, 0x24, 0x01, 0x24, 0x01,\n        0x98, 0x00, 0x00\n    },/*\"s\",83*/\n    {\n        0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x07, 0xF8, 0x01, 0x04, 0x01, 0x04, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"t\",84*/\n    {\n        0x01, 0x00, 0x01, 0xF8, 0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0x01, 0x08, 0x01,\n        0xFC, 0x00, 0x04\n    },/*\"u\",85*/\n    {\n        0x01, 0x00, 0x01, 0x80, 0x01, 0x70, 0x00, 0x0C, 0x00, 0x10, 0x01, 0x60, 0x01,\n        0x80, 0x01, 0x00\n    },/*\"v\",86*/\n    {\n        0x01, 0xF0, 0x01, 0x0C, 0x00, 0x30, 0x01, 0xC0, 0x00, 0x30, 0x01, 0x0C, 0x01,\n        0xF0, 0x01, 0x00\n    },/*\"w\",87*/\n    {\n        0x00, 0x00, 0x01, 0x04, 0x01, 0x8C, 0x00, 0x74, 0x01, 0x70, 0x01, 0x8C, 0x01,\n        0x04, 0x00, 0x00\n    },/*\"x\",88*/\n    {\n        0x01, 0x01, 0x01, 0x81, 0x01, 0x71, 0x00, 0x0E, 0x00, 0x18, 0x01, 0x60, 0x01,\n        0x80, 0x01, 0x00\n    },/*\"y\",89*/\n    {\n        0x00, 0x00, 0x01, 0x84, 0x01, 0x0C, 0x01, 0x34, 0x01, 0x44, 0x01, 0x84, 0x01,\n        0x0C, 0x00, 0x00\n    },/*\"z\",90*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x3E, 0xFC, 0x40,\n        0x02, 0x40, 0x02\n    },/*\"{\",91*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"|\",92*/\n    {\n        0x00, 0x00, 0x40, 0x02, 0x40, 0x02, 0x3E, 0xFC, 0x01, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00\n    },/*\"}\",93*/\n    {\n        0x00, 0x00, 0x60, 0x00, 0x80, 0x00, 0x80, 0x00, 0x40, 0x00, 0x40, 0x00, 0x20,\n        0x00, 0x20, 0x00\n    }, /*\"~\",94*/\n};\n\nconst uint8_t c_chFont1612[11][32] = { {\n        0x00, 0x00, 0x3F, 0xFC, 0x3F, 0xFC,\n        0x30, 0x0C, 0x30, 0x0C, 0x30, 0x0C, 0x30, 0x0C, 0x30, 0x0C, 0x30, 0x0C,\n        0x30, 0x0C, 0x30, 0x0C, 0x30, 0x0C, 0x30, 0x0C, 0x3F, 0xFC, 0x3F, 0xFC,\n        0x00, 0x00\n    },/*\"0\",0*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x30, 0x00, 0x30, 0x00, 0x3F, 0xFC, 0x3F, 0xFC, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },/*\"1\",1*/\n    {\n        0x00, 0x00, 0x39, 0xFC, 0x39, 0xFC, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x3F, 0x8C, 0x3F, 0x8C, 0x00, 0x00\n    },/*\"2\",2*/\n    {\n        0x00, 0x00, 0x38, 0x1C, 0x38, 0x1C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x3F, 0xFC, 0x3F, 0xFC, 0x00, 0x00\n    },/*\"3\",3*/\n    {\n        0x00, 0x00, 0x3F, 0x80, 0x3F, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01,\n        0x80, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01,\n        0x80, 0x3F, 0xFC, 0x3F, 0xFC, 0x00, 0x00\n    },/*\"4\",4*/\n    {\n        0x00, 0x00, 0x3F, 0x9C, 0x3F, 0x9C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0xFC, 0x31, 0xFC, 0x00, 0x00\n    },/*\"5\",5*/\n    {\n        0x00, 0x00, 0x3F, 0xFC, 0x3F, 0xFC, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0xFC, 0x31, 0xFC, 0x00, 0x00\n    },/*\"6\",6*/\n    {\n        0x00, 0x00, 0x38, 0x00, 0x38, 0x00, 0x30, 0x00, 0x30, 0x00, 0x30, 0x00, 0x30,\n        0x00, 0x30, 0x00, 0x30, 0x00, 0x30, 0x00, 0x30, 0x00, 0x30, 0x00, 0x30,\n        0x00, 0x3F, 0xFC, 0x3F, 0xFC, 0x00, 0x00\n    },/*\"7\",7*/\n    {\n        0x00, 0x00, 0x3F, 0xFC, 0x3F, 0xFC, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x3F, 0xFC, 0x3F, 0xFC, 0x00, 0x00\n    },/*\"8\",8*/\n    {\n        0x00, 0x00, 0x3F, 0x9C, 0x3F, 0x9C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31, 0x8C, 0x31,\n        0x8C, 0x3F, 0xFC, 0x3F, 0xFC, 0x00, 0x00\n    },/*\"9\",9*/\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x18, 0x30, 0x18, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    }, /*\":\",10*/\n};\n\nconst uint8_t c_chFont3216[11][64] = { {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC, 0x30, 0x00,\n        0x00, 0x0C, 0x30, 0x00, 0x00, 0x0C, 0x30, 0x00, 0x00, 0x0C, 0x30, 0x00,\n        0x00, 0x0C,/*\"0\",0*/\n        0x30, 0x00, 0x00, 0x0C, 0x30, 0x00, 0x00, 0x0C, 0x30, 0x00, 0x00, 0x0C,\n        0x30, 0x00, 0x00, 0x0C, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30,\n        0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00,/*\"1\",1*/\n        0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3C, 0x01, 0xFF, 0xFC, 0x3C,\n        0x01, 0xFF, 0xFC, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30,\n        0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,/*\"2\",2*/\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,\n        0x30, 0x01, 0x80, 0x0C, 0x3F, 0xFF, 0x80, 0x0C, 0x3F, 0xFF, 0x80, 0x0C,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x3C, 0x38,\n        0x00, 0x00, 0x3C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30,\n        0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,/*\"3\",3*/\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,\n        0x30, 0x01, 0x80, 0x0C, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0x80, 0x00, 0x3F,\n        0xFF, 0x80, 0x00, 0x00, 0x01, 0x80, 0x00, 0x00, 0x01, 0x80, 0x00, 0x00,\n        0x01, 0x80, 0x00, 0x00, 0x01, 0x80, 0x00,/*\"4\",4*/\n        0x00, 0x01, 0x80, 0x00, 0x00, 0x01, 0x80, 0x00, 0x00, 0x01, 0x80, 0x00,\n        0x00, 0x01, 0x80, 0x00, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0x80, 0x3C, 0x3F,\n        0xFF, 0x80, 0x3C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30,\n        0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,/*\"5\",5*/\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0xFF, 0xFC, 0x30, 0x01, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F,\n        0xFF, 0xFF, 0xFC, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30,\n        0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,/*\"6\",6*/\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,\n        0x30, 0x01, 0x80, 0x0C, 0x3C, 0x01, 0xFF, 0xFC, 0x3C, 0x01, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3C, 0x00, 0x00, 0x00, 0x3C,\n        0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x30,\n        0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00,/*\"7\",7*/\n        0x30, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00,\n        0x30, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F,\n        0xFF, 0xFF, 0xFC, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30,\n        0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,/*\"8\",8*/\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,\n        0x30, 0x01, 0x80, 0x0C, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F, 0xFF, 0x80, 0x3C, 0x3F,\n        0xFF, 0x80, 0x3C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30,\n        0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,/*\"9\",9*/\n        0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C, 0x30, 0x01, 0x80, 0x0C,\n        0x30, 0x01, 0x80, 0x0C, 0x3F, 0xFF, 0xFF, 0xFC, 0x3F, 0xFF, 0xFF, 0xFC,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    },\n\n    {\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F,\n        0xF0, 0x0F, 0xF0, 0x0C, 0x00, 0x00, 0x30,/*\":\",10*/\n        0x0C, 0x00, 0x00, 0x30, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,\n        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n    }\n};\n\nconst uint8_t c_chBmp4016[96] = { //SUN\n    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3F,\n    0xF1, 0x81, 0x8F, 0xFC, 0x3F, 0xF1, 0x81, 0x8F, 0xFC, 0x30,\n    0x31, 0x81, 0x8C, 0x0C, 0x30, 0x01, 0x81, 0x8C, 0x0C, 0x30,\n    0x01, 0x81, 0x8C, 0x0C, 0x3F, 0xF1, 0x81, 0x8C, 0x0C, 0x3F,\n    0xF1, 0x81, 0x8C, 0x0C, 0x00, 0x31, 0x81, 0x8C, 0x0C, 0x00,\n    0x31, 0x81, 0x8C, 0x0C, 0x30, 0x31, 0x81, 0x8C, 0x0C, 0x3F,\n    0xF1, 0xFF, 0x8C, 0x0C, 0x3F, 0xF1, 0xFF, 0x8C, 0x0C, 0x00,\n    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00\n};\n\nconst uint8_t c_chSingal816[16] = { //mobie singal\n    0xFE, 0x02, 0x92, 0x0A, 0x54, 0x2A, 0x38, 0xAA, 0x12, 0xAA, 0x12,\n    0xAA, 0x12, 0xAA, 0x12, 0xAA\n};\n\nconst uint8_t c_chMsg816[16] = { //message\n    0x1F, 0xF8, 0x10, 0x08, 0x18, 0x18, 0x14, 0x28, 0x13, 0xC8, 0x10,\n    0x08, 0x10, 0x08, 0x1F, 0xF8\n};\n\nconst uint8_t c_chBat816[16] = { //batery\n    0x0F, 0xFE, 0x30, 0x02, 0x26, 0xDA, 0x26, 0xDA, 0x26, 0xDA, 0x26,\n    0xDA, 0x30, 0x02, 0x0F, 0xFE\n};\n\nconst uint8_t c_chBluetooth88[8] = // bluetooth\n{ 0x18, 0x54, 0x32, 0x1C, 0x1C, 0x32, 0x54, 0x18 };\n\nconst uint8_t c_chGPRS88[8] = //GPRS\n{ 0xC3, 0x99, 0x24, 0x20, 0x2C, 0x24, 0x99, 0xC3 };\n\nconst uint8_t c_chAlarm88[8] = //alram\n{ 0xC3, 0xBD, 0x42, 0x52, 0x4E, 0x42, 0x3C, 0xC3 };\n"
         }
     ],
     "functions": [
@@ -53,11 +164,153 @@
                 "app_main"
             ],
             "scope": "global",
-            "text": "static esp_err_t i2c_master_init(void)\n{\n    i2c_config_t conf = {\n        .mode = I2C_MODE_MASTER,\n        .sda_io_num = I2C_MASTER_SDA_IO,       // GPIO 21\n        .scl_io_num = I2C_MASTER_SCL_IO,       // GPIO 22\n        .sda_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SDA\n        .scl_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SCL\n        .master.clk_speed = I2C_MASTER_FREQ_HZ, // 100 kHz\n    };\n\n    // Apply the configuration to the I2C port\n    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);\n    if (err != ESP_OK) return err;\n\n    // Install the I2C driver\n    // Parameters: port, mode, rx buffer (0 for master), tx buffer (0 for master), flags\n    return i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);\n}",
+            "text": "static esp_err_t i2c_master_init(void)\n{\n    i2c_config_t conf = {\n        .mode = I2C_MODE_MASTER,\n        .sda_io_num = I2C_MASTER_SDA_IO,\n        .scl_io_num = I2C_MASTER_SCL_IO,\n        .sda_pullup_en = GPIO_PULLUP_ENABLE,\n        .scl_pullup_en = GPIO_PULLUP_ENABLE,\n        .master.clk_speed = I2C_MASTER_FREQ_HZ,\n    };\n    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);\n    if (err != ESP_OK) return err;\n    return i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);\n}",
             "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
             "location": {
-                "line_start": 20,
-                "line_end": 38,
+                "line_start": 42,
+                "line_end": 55,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "max30102_read_fifo",
+            "in_scope": true,
+            "calls": [
+                "max30102_read_reg"
+            ],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static esp_err_t max30102_read_fifo(uint32_t *red, uint32_t *ir)\n{\n    uint8_t buf[6];\n    esp_err_t err = max30102_read_reg(MAX30102_REG_FIFO_DATA, buf, 6);\n    if (err != ESP_OK) return err;\n\n    *red = ((uint32_t)(buf[0] & 0x3F) << 16) | ((uint32_t)buf[1] << 8) | buf[2];\n    *ir  = ((uint32_t)(buf[3] & 0x3F) << 16) | ((uint32_t)buf[4] << 8) | buf[5];\n\n    return ESP_OK;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 117,
+                "line_end": 127,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "max30102_write_reg",
+            "in_scope": true,
+            "calls": [
+                "i2c_master_write_to_device",
+                "pdMS_TO_TICKS"
+            ],
+            "is_called_by": [
+                "max30102_init"
+            ],
+            "scope": "global",
+            "text": "static esp_err_t max30102_write_reg(uint8_t reg, uint8_t value)\n{\n    uint8_t data[2] = {reg, value};\n    return i2c_master_write_to_device(I2C_MASTER_NUM, MAX30102_I2C_ADDRESS,\n                                       data, sizeof(data),\n                                       pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 60,
+                "line_end": 66,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "max30102_read_reg",
+            "in_scope": true,
+            "calls": [
+                "i2c_master_write_read_device",
+                "pdMS_TO_TICKS"
+            ],
+            "is_called_by": [
+                "max30102_read_fifo",
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static esp_err_t max30102_read_reg(uint8_t reg, uint8_t *data, size_t len)\n{\n    return i2c_master_write_read_device(I2C_MASTER_NUM, MAX30102_I2C_ADDRESS,\n                                         &reg, 1, data, len,\n                                         pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 71,
+                "line_end": 76,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "max30102_init",
+            "in_scope": true,
+            "calls": [
+                "max30102_write_reg",
+                "vTaskDelay",
+                "pdMS_TO_TICKS",
+                "ESP_LOGI"
+            ],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static esp_err_t max30102_init(void)\n{\n    esp_err_t err;\n\n    err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x40);\n    if (err != ESP_OK) return err;\n    vTaskDelay(pdMS_TO_TICKS(100));\n\n    err = max30102_write_reg(MAX30102_REG_INTR_ENABLE_1, 0xC0);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_FIFO_WR_PTR, 0x00);\n    if (err != ESP_OK) return err;\n    err = max30102_write_reg(MAX30102_REG_OVF_COUNTER, 0x00);\n    if (err != ESP_OK) return err;\n    err = max30102_write_reg(MAX30102_REG_FIFO_RD_PTR, 0x00);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x03);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_SPO2_CONFIG, 0x27);\n    if (err != ESP_OK) return err;\n\n    err = max30102_write_reg(MAX30102_REG_LED1_PA, 0xFF);\n    if (err != ESP_OK) return err;\n    err = max30102_write_reg(MAX30102_REG_LED2_PA, 0xFF);\n    if (err != ESP_OK) return err;\n\n    ESP_LOGI(TAG, \"MAX30102 initialized\");\n    return ESP_OK;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 81,
+                "line_end": 112,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "oled_init",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_create",
+                "ssd1306_clear_screen",
+                "ssd1306_refresh_gram"
+            ],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static ssd1306_handle_t oled_init(void)\n{\n    ssd1306_handle_t oled = ssd1306_create(I2C_MASTER_NUM, OLED_I2C_ADDRESS);\n    if (oled == NULL) return NULL;\n    ssd1306_refresh_gram(oled);\n    ssd1306_clear_screen(oled, 0x00);\n    return oled;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 132,
+                "line_end": 139,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "display_raw",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_clear_screen",
+                "ssd1306_draw_string",
+                "snprintf",
+                "ssd1306_refresh_gram"
+            ],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static void display_raw(ssd1306_handle_t oled, uint32_t bpm, uint32_t ir)\n{\n    char line[32];\n    ssd1306_clear_screen(oled, 0x00);\n\n    snprintf(line, sizeof(line), \"BPM: %lu\", bpm);\n    ssd1306_draw_string(oled, 0, 0, (const uint8_t *)line, 16, 1);\n\n    snprintf(line, sizeof(line), \"IR:  %lu\", ir);\n    ssd1306_draw_string(oled, 0, 16, (const uint8_t *)line, 16, 1);\n\n    if (bpm == 0) {\n        snprintf(line, sizeof(line), \"Place finger\");\n        ssd1306_draw_string(oled, 0, 32, (const uint8_t *)line, 16, 1);\n        snprintf(line, sizeof(line), \"on sensor...\");\n        ssd1306_draw_string(oled, 0, 48, (const uint8_t *)line, 16, 1);\n    } else {\n        snprintf(line, sizeof(line), \"Reading OK\");\n        ssd1306_draw_string(oled, 0, 32, (const uint8_t *)line, 16, 1);\n    }\n\n    ssd1306_refresh_gram(oled);\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 144,
+                "line_end": 166,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "calculate_bpm",
+            "in_scope": true,
+            "calls": [],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static int calculate_bpm(uint32_t *ir_buffer, int buffer_size)\n{\n    uint32_t avg = 0;\n    for (int i = 0; i < buffer_size; i++) {\n        avg += ir_buffer[i];\n    }\n    avg /= buffer_size;\n\n    if (avg < FINGER_THRESHOLD) return 0;\n\n    uint32_t min_val = ir_buffer[0], max_val = ir_buffer[0];\n    for (int i = 1; i < buffer_size; i++) {\n        if (ir_buffer[i] < min_val) min_val = ir_buffer[i];\n        if (ir_buffer[i] > max_val) max_val = ir_buffer[i];\n    }\n    uint32_t range = max_val - min_val;\n\n    if (range < 200) return 0;\n\n    uint32_t peak_threshold = avg + (range * 3 / 10);\n\n    int last_peak_index = -1;\n    int peak_intervals[20];\n    int interval_count = 0;\n\n    for (int i = 1; i < buffer_size - 1; i++) {\n        if (ir_buffer[i] > ir_buffer[i-1] &&\n            ir_buffer[i] > ir_buffer[i+1] &&\n            ir_buffer[i] > peak_threshold) {\n\n            if (last_peak_index != -1) {\n                int interval = i - last_peak_index;\n                if (interval >= 7 && interval <= 31 && interval_count < 20) {\n                    peak_intervals[interval_count++] = interval;\n                }\n            }\n            last_peak_index = i;\n        }\n    }\n\n    if (interval_count < 2) return 0;\n\n    int avg_interval = 0;\n    for (int i = 0; i < interval_count; i++) {\n        avg_interval += peak_intervals[i];\n    }\n    avg_interval /= interval_count;\n\n    int clean_interval = 0;\n    int clean_count = 0;\n    for (int i = 0; i < interval_count; i++) {\n        int diff = peak_intervals[i] - avg_interval;\n        if (diff < 0) diff = -diff;\n        if (diff < avg_interval / 5) {\n            clean_interval += peak_intervals[i];\n            clean_count++;\n        }\n    }\n\n    if (clean_count < 2) return 0;\n    clean_interval /= clean_count;\n\n    int bpm = 60000 / (clean_interval * SAMPLE_RATE_MS);\n\n    if (bpm < 40 || bpm > 200) return 0;\n\n    return bpm;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 171,
+                "line_end": 238,
                 "column_start": 0,
                 "column_end": 1
             }
@@ -67,63 +320,380 @@
             "in_scope": true,
             "calls": [
                 "i2c_master_init",
-                "i2c_scanner",
                 "ESP_LOGE",
+                "max30102_read_reg",
                 "ESP_LOGI",
-                "esp_err_to_name"
+                "pdMS_TO_TICKS",
+                "vTaskDelay",
+                "calculate_bpm",
+                "display_raw",
+                "max30102_init",
+                "oled_init",
+                "max30102_read_fifo"
             ],
             "is_called_by": [],
             "scope": "global",
-            "text": "void app_main(void)\n{\n    // Initialize I2C\n    esp_err_t err = i2c_master_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"I2C initialization failed: %s\", esp_err_to_name(err));\n        return;\n    }\n    ESP_LOGI(TAG, \"I2C initialized successfully\");\n\n    // Run the scanner\n    i2c_scanner();\n}",
+            "text": "void app_main(void)\n{\n    esp_err_t err = i2c_master_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"I2C init failed\");\n        return;\n    }\n\n    ssd1306_handle_t oled = oled_init();\n    if (oled == NULL) {\n        ESP_LOGE(TAG, \"OLED init failed\");\n        return;\n    }\n\n    err = max30102_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"MAX30102 init failed\");\n        return;\n    }\n\n    uint32_t red = 0, ir = 0;\n    uint32_t ir_buffer[SAMPLE_BUFFER_SIZE];\n    int buffer_index = 0;\n    int bpm = 0;\n\n    int bpm_history[5] = {0};\n    int bpm_history_index = 0;\n\n    while (1) {\n        uint8_t wr_ptr = 0, rd_ptr = 0;\n        max30102_read_reg(MAX30102_REG_FIFO_WR_PTR, &wr_ptr, 1);\n        max30102_read_reg(MAX30102_REG_FIFO_RD_PTR, &rd_ptr, 1);\n        int num_samples = (wr_ptr - rd_ptr + 32) % 32;\n\n        // DEBUG \u2014 always print pointer values\n        ESP_LOGI(TAG, \"WR: %d  RD: %d  samples: %d\", wr_ptr, rd_ptr, num_samples);\n\n        for (int s = 0; s < num_samples; s++) {\n            err = max30102_read_fifo(&red, &ir);\n            if (err != ESP_OK) break;\n\n            ESP_LOGI(TAG, \"RAW IR: %lu  RED: %lu\", ir, red);\n\n            if (ir > FINGER_THRESHOLD) {\n                ir_buffer[buffer_index++] = ir;\n\n                if (buffer_index >= SAMPLE_BUFFER_SIZE) {\n                    buffer_index = 0;\n                    bpm = calculate_bpm(ir_buffer, SAMPLE_BUFFER_SIZE);\n\n                    if (bpm > 0) {\n                        bpm_history[bpm_history_index++ % 5] = bpm;\n                        int bpm_avg = 0;\n                        int count = 0;\n                        for (int i = 0; i < 5; i++) {\n                            if (bpm_history[i] > 0) {\n                                bpm_avg += bpm_history[i];\n                                count++;\n                            }\n                        }\n                        bpm_avg = count > 0 ? bpm_avg / count : 0;\n                        ESP_LOGI(TAG, \"BPM: %d (avg: %d)\", bpm, bpm_avg);\n                        display_raw(oled, bpm_avg, ir);\n                    } else {\n                        display_raw(oled, 0, ir);\n                    }\n                }\n            } else {\n                buffer_index = 0;\n                display_raw(oled, 0, 0);\n                ESP_LOGI(TAG, \"No finger\");\n            }\n        }\n\n        vTaskDelay(pdMS_TO_TICKS(SAMPLE_RATE_MS));\n    }\n}",
             "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
             "location": {
-                "line_start": 89,
-                "line_end": 101,
+                "line_start": 243,
+                "line_end": 319,
                 "column_start": 0,
                 "column_end": 1
             }
         },
         {
-            "name": "i2c_scanner",
+            "name": "ssd1306_write_cmd_byte",
             "in_scope": true,
             "calls": [
-                "ESP_LOGI",
-                "i2c_probe_address"
+                "ssd1306_write_cmd"
             ],
             "is_called_by": [
-                "app_main"
+                "ssd1306_init"
             ],
             "scope": "global",
-            "text": "static void i2c_scanner(void)\n{\n    ESP_LOGI(TAG, \"Starting I2C scan...\");\n    int devices_found = 0;\n\n    for (uint8_t address = 1; address < 128; address++)\n    {\n        if (i2c_probe_address(address))\n        {\n            ESP_LOGI(TAG, \"Found device at address: 0x%02X\", address);\n            devices_found++;\n        }\n    }\n\n    if (devices_found == 0) {\n        ESP_LOGI(TAG, \"No I2C devices found\");\n    } else {\n        ESP_LOGI(TAG, \"Scan complete \u2014 %d device(s) found\", devices_found);\n    }\n}",
-            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "text": "static inline esp_err_t ssd1306_write_cmd_byte(ssd1306_handle_t dev, const uint8_t cmd)\n{\n    return ssd1306_write_cmd(dev, &cmd, 1);\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
             "location": {
-                "line_start": 65,
-                "line_end": 84,
+                "line_start": 75,
+                "line_end": 78,
                 "column_start": 0,
                 "column_end": 1
             }
         },
         {
-            "name": "i2c_probe_address",
+            "name": "ssd1306_write_data",
             "in_scope": true,
             "calls": [
                 "i2c_cmd_link_create",
-                "i2c_master_write_byte",
-                "i2c_master_stop",
+                "assert",
                 "i2c_master_start",
-                "i2c_master_cmd_begin",
-                "pdMS_TO_TICKS",
-                "i2c_cmd_link_delete"
+                "i2c_master_write_byte",
+                "i2c_master_write",
+                "i2c_master_stop",
+                "i2c_cmd_link_delete",
+                "i2c_master_cmd_begin"
             ],
             "is_called_by": [
-                "i2c_scanner"
+                "ssd1306_refresh_gram"
             ],
             "scope": "global",
-            "text": "static bool i2c_probe_address(uint8_t address)\n{\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    i2c_master_start(cmd);\n    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, true);\n    i2c_master_stop(cmd);\n\n    esp_err_t err = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n    i2c_cmd_link_delete(cmd);\n\n    return (err == ESP_OK);\n}",
-            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "text": "static esp_err_t ssd1306_write_data(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    esp_err_t ret;\n\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    ret = i2c_master_start(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, device->dev_addr | I2C_MASTER_WRITE, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, SSD1306_WRITE_DAT, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write(cmd, data, data_len, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_stop(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_cmd_begin(device->bus, cmd, 1000 / portTICK_PERIOD_MS);\n    i2c_cmd_link_delete(cmd);\n\n    return ret;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
             "location": {
-                "line_start": 46,
-                "line_end": 57,
+                "line_start": 31,
+                "line_end": 51,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_num",
+            "in_scope": true,
+            "calls": [
+                "_pow",
+                "ssd1306_draw_char"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_draw_num(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                      uint32_t chNum, uint8_t chLen, uint8_t chSize)\n{\n    uint8_t i;\n    uint8_t chTemp, chShow = 0;\n\n    for (i = 0; i < chLen; i++) {\n        chTemp = (chNum / _pow(10, chLen - i - 1)) % 10;\n        if (chShow == 0 && i < (chLen - 1)) {\n            if (chTemp == 0) {\n                ssd1306_draw_char(dev, chXpos + (chSize / 2) * i, chYpos,\n                                  ' ', chSize, 1);\n                continue;\n            } else {\n                chShow = 1;\n            }\n        }\n        ssd1306_draw_char(dev, chXpos + (chSize / 2) * i, chYpos,\n                          chTemp + '0', chSize, 1);\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 92,
+                "line_end": 112,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_string",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_clear_screen",
+                "ssd1306_draw_char"
+            ],
+            "is_called_by": [
+                "display_raw"
+            ],
+            "scope": "global",
+            "text": "void ssd1306_draw_string(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                         const uint8_t *pchString, uint8_t chSize, uint8_t chMode)\n{\n    while (*pchString != '\\0') {\n        if (chXpos > (SSD1306_WIDTH - chSize / 2)) {\n            chXpos = 0;\n            chYpos += chSize;\n            if (chYpos > (SSD1306_HEIGHT - chSize)) {\n                chYpos = chXpos = 0;\n                ssd1306_clear_screen(dev, 0x00);\n            }\n        }\n        ssd1306_draw_char(dev, chXpos, chYpos, *pchString, chSize, chMode);\n        chXpos += chSize / 2;\n        pchString++;\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 154,
+                "line_end": 170,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_1616char",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_fill_point"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_draw_1616char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar)\n{\n    uint8_t i, j;\n    uint8_t chTemp = 0, chYpos0 = chYpos, chMode = 0;\n\n    for (i = 0; i < 32; i++) {\n        chTemp = c_chFont1612[chChar - 0x30][i];\n        for (j = 0; j < 8; j++) {\n            chMode = chTemp & 0x80 ? 1 : 0;\n            ssd1306_fill_point(dev, chXpos, chYpos, chMode);\n            chTemp <<= 1;\n            chYpos++;\n            if ((chYpos - chYpos0) == 16) {\n                chYpos = chYpos0;\n                chXpos++;\n                break;\n            }\n        }\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 191,
+                "line_end": 210,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_bitmap",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_fill_point"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                         const uint8_t *pchBmp, uint8_t chWidth, uint8_t chHeight)\n{\n    uint16_t i, j, byteWidth = (chWidth + 7) / 8;\n\n    for (j = 0; j < chHeight; j++) {\n        for (i = 0; i < chWidth; i++) {\n            if (*(pchBmp + j * byteWidth + i / 8) & (128 >> (i & 7))) {\n                ssd1306_fill_point(dev, chXpos + i, chYpos + j, 1);\n            }\n        }\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 233,
+                "line_end": 245,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_init",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_write_cmd_byte",
+                "ssd1306_write_cmd",
+                "ssd1306_clear_screen"
+            ],
+            "is_called_by": [
+                "ssd1306_create"
+            ],
+            "scope": "global",
+            "text": "esp_err_t ssd1306_init(ssd1306_handle_t dev)\n{\n    esp_err_t ret;\n\n    ssd1306_write_cmd_byte(dev, 0xAE); //--turn off oled panel\n    ssd1306_write_cmd_byte(dev, 0x40); //--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)\n    ssd1306_write_cmd_byte(dev, 0x81); //--set contrast control register\n    ssd1306_write_cmd_byte(dev, 0xCF); // Set SEG Output Current Brightness\n    ssd1306_write_cmd_byte(dev, 0xA1); //--Set SEG/Column Mapping\n    ssd1306_write_cmd_byte(dev, 0xC0); //Set COM/Row Scan Direction\n    ssd1306_write_cmd_byte(dev, 0xA6); //--set normal display\n    ssd1306_write_cmd_byte(dev, 0xA8); //--set multiplex ratio(1 to 64)\n    ssd1306_write_cmd_byte(dev, 0x3f); //--1/64 duty\n    ssd1306_write_cmd_byte(dev, 0xd5); //--set display clock divide ratio/oscillator frequency\n    ssd1306_write_cmd_byte(dev, 0x80); //--set divide ratio, Set Clock as 100 Frames/Sec\n    ssd1306_write_cmd_byte(dev, 0xD9); //--set pre-charge period\n    ssd1306_write_cmd_byte(dev, 0xF1); //Set Pre-Charge as 15 Clocks & Discharge as 1 Clock\n    ssd1306_write_cmd_byte(dev, 0xDA); //--set com pins hardware configuration\n    ssd1306_write_cmd_byte(dev, 0xDB); //--set vcomh\n    ssd1306_write_cmd_byte(dev, 0x40); //Set VCOM Deselect Level\n    ssd1306_write_cmd_byte(dev, 0x8D); //--set Charge Pump enable/disable\n    ssd1306_write_cmd_byte(dev, 0x14); //--set(0x10) disable\n    ssd1306_write_cmd_byte(dev, 0xA4); // Disable Entire Display On (0xa4/0xa5)\n    ssd1306_write_cmd_byte(dev, 0xA6); // Disable Inverse Display On (0xa6/a7)\n\n    const uint8_t cmd[2] = {0x20, 1}; //-- set vertical adressing mode\n    ssd1306_write_cmd(dev, cmd, sizeof(cmd));\n\n    uint8_t cmd2[3] = {0x21, 0, 127};\n    ssd1306_write_cmd(dev, cmd2, sizeof(cmd2)); //--set column address to zero\n    cmd2[0] = 0x22;\n    cmd2[2] = 7;\n    ssd1306_write_cmd(dev, cmd2, sizeof(cmd2)); //--set row address to zero\n\n    ret = ssd1306_write_cmd_byte(dev, 0xAF); //--turn on oled panel\n\n    ssd1306_clear_screen(dev, 0x00);\n    return ret;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 298,
+                "line_end": 336,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_delete",
+            "in_scope": true,
+            "calls": [
+                "free"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_delete(ssd1306_handle_t dev)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    free(device);\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 347,
+                "line_end": 351,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "_pow",
+            "in_scope": true,
+            "calls": [],
+            "is_called_by": [
+                "ssd1306_draw_num"
+            ],
+            "scope": "global",
+            "text": "static uint32_t _pow(uint8_t m, uint8_t n)\n{\n    uint32_t result = 1;\n    while (n--) {\n        result *= m;\n    }\n    return result;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 22,
+                "line_end": 29,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_write_cmd",
+            "in_scope": true,
+            "calls": [
+                "i2c_cmd_link_create",
+                "assert",
+                "i2c_master_write_byte",
+                "i2c_master_start",
+                "i2c_master_write",
+                "i2c_master_stop",
+                "i2c_cmd_link_delete",
+                "i2c_master_cmd_begin"
+            ],
+            "is_called_by": [
+                "ssd1306_write_cmd_byte",
+                "ssd1306_init"
+            ],
+            "scope": "global",
+            "text": "static esp_err_t ssd1306_write_cmd(ssd1306_handle_t dev, const uint8_t *const data, const uint16_t data_len)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    esp_err_t ret;\n\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    ret = i2c_master_start(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, device->dev_addr | I2C_MASTER_WRITE, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write_byte(cmd, SSD1306_WRITE_CMD, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_write(cmd, data, data_len, true);\n    assert(ESP_OK == ret);\n    ret = i2c_master_stop(cmd);\n    assert(ESP_OK == ret);\n    ret = i2c_master_cmd_begin(device->bus, cmd, 1000 / portTICK_PERIOD_MS);\n    i2c_cmd_link_delete(cmd);\n\n    return ret;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 53,
+                "line_end": 73,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_fill_rectangle",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_fill_point"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_fill_rectangle(ssd1306_handle_t dev, uint8_t chXpos1,\n                            uint8_t chYpos1, uint8_t chXpos2, uint8_t chYpos2, uint8_t chDot)\n{\n    uint8_t chXpos, chYpos;\n\n    for (chXpos = chXpos1; chXpos <= chXpos2; chXpos++) {\n        for (chYpos = chYpos1; chYpos <= chYpos2; chYpos++) {\n            ssd1306_fill_point(dev, chXpos, chYpos, chDot);\n        }\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 80,
+                "line_end": 90,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_char",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_fill_point"
+            ],
+            "is_called_by": [
+                "ssd1306_draw_num",
+                "ssd1306_draw_string"
+            ],
+            "scope": "global",
+            "text": "void ssd1306_draw_char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos,\n                       uint8_t chChr, uint8_t chSize, uint8_t chMode)\n{\n    uint8_t i, j;\n    uint8_t chTemp, chYpos0 = chYpos;\n\n    chChr = chChr - ' ';\n    for (i = 0; i < chSize; i++) {\n        if (chSize == 12) {\n            if (chMode) {\n                chTemp = c_chFont1206[chChr][i];\n            } else {\n                chTemp = ~c_chFont1206[chChr][i];\n            }\n        } else {\n            if (chMode) {\n                chTemp = c_chFont1608[chChr][i];\n            } else {\n                chTemp = ~c_chFont1608[chChr][i];\n            }\n        }\n\n        for (j = 0; j < 8; j++) {\n            if (chTemp & 0x80) {\n                ssd1306_fill_point(dev, chXpos, chYpos, 1);\n            } else {\n                ssd1306_fill_point(dev, chXpos, chYpos, 0);\n            }\n            chTemp <<= 1;\n            chYpos++;\n\n            if ((chYpos - chYpos0) == chSize) {\n                chYpos = chYpos0;\n                chXpos++;\n                break;\n            }\n        }\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 114,
+                "line_end": 152,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_fill_point",
+            "in_scope": true,
+            "calls": [],
+            "is_called_by": [
+                "ssd1306_draw_1616char",
+                "ssd1306_draw_bitmap",
+                "ssd1306_fill_rectangle",
+                "ssd1306_draw_char",
+                "ssd1306_draw_3216char",
+                "ssd1306_draw_line"
+            ],
+            "scope": "global",
+            "text": "void ssd1306_fill_point(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chPoint)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    uint8_t chPos, chBx, chTemp = 0;\n\n    if (chXpos > 127 || chYpos > 63) {\n        return;\n    }\n    chPos = 7 - chYpos / 8;\n    chBx = chYpos % 8;\n    chTemp = 1 << (7 - chBx);\n\n    if (chPoint) {\n        device->s_chDisplayBuffer[chXpos][chPos] |= chTemp;\n    } else {\n        device->s_chDisplayBuffer[chXpos][chPos] &= ~chTemp;\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 172,
+                "line_end": 189,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_3216char",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_fill_point"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_draw_3216char(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpos, uint8_t chChar)\n{\n    uint8_t i, j;\n    uint8_t chTemp = 0, chYpos0 = chYpos, chMode = 0;\n\n    for (i = 0; i < 64; i++) {\n        chTemp = c_chFont3216[chChar - 0x30][i];\n        for (j = 0; j < 8; j++) {\n            chMode = chTemp & 0x80 ? 1 : 0;\n            ssd1306_fill_point(dev, chXpos, chYpos, chMode);\n            chTemp <<= 1;\n            chYpos++;\n            if ((chYpos - chYpos0) == 32) {\n                chYpos = chYpos0;\n                chXpos++;\n                break;\n            }\n        }\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 212,
+                "line_end": 231,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_draw_line",
+            "in_scope": true,
+            "calls": [
+                "abs",
+                "COORDINATE_SWAP",
+                "ssd1306_fill_point"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void ssd1306_draw_line(ssd1306_handle_t dev, int16_t chXpos1, int16_t chYpos1, int16_t chXpos2, int16_t chYpos2)\n{\n    // 16-bit variables allowing a display overflow effect\n    int16_t x_len = abs(chXpos1 - chXpos2);\n    int16_t y_len = abs(chYpos1 - chYpos2);\n\n    if (y_len < x_len) {\n        if (chXpos1 > chXpos2) {\n            COORDINATE_SWAP(chXpos1, chXpos2, chYpos1, chYpos2);\n        }\n        int16_t len = x_len;\n        int16_t diff = y_len;\n\n        do {\n            if (diff >= x_len) {\n                diff -= x_len;\n                if (chYpos1 < chYpos2) {\n                    chYpos1++;\n                } else {\n                    chYpos1--;\n                }\n            }\n\n            diff += y_len;\n            ssd1306_fill_point(dev, chXpos1++, chYpos1, 1);\n        } while (len--);\n    }\n\n    else {\n        if (chYpos1 > chYpos2) {\n            COORDINATE_SWAP(chXpos1, chXpos2, chYpos1, chYpos2);\n        }\n        int16_t len = y_len;\n        int16_t diff = x_len;\n\n        do {\n            if (diff >= y_len) {\n                diff -= y_len;\n                if (chXpos1 < chXpos2) {\n                    chXpos1++;\n                } else {\n                    chXpos1--;\n                }\n            }\n\n            diff += x_len;\n            ssd1306_fill_point(dev, chXpos1, chYpos1++, 1);\n        } while (len--);\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 247,
+                "line_end": 296,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_create",
+            "in_scope": true,
+            "calls": [
+                "calloc",
+                "ssd1306_init"
+            ],
+            "is_called_by": [
+                "oled_init"
+            ],
+            "scope": "global",
+            "text": "ssd1306_handle_t ssd1306_create(i2c_port_t bus, uint16_t dev_addr)\n{\n    ssd1306_dev_t *dev = (ssd1306_dev_t *) calloc(1, sizeof(ssd1306_dev_t));\n    dev->bus = bus;\n    dev->dev_addr = dev_addr << 1;\n    ssd1306_init((ssd1306_handle_t) dev);\n    return (ssd1306_handle_t) dev;\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 338,
+                "line_end": 345,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_refresh_gram",
+            "in_scope": true,
+            "calls": [
+                "ssd1306_write_data"
+            ],
+            "is_called_by": [
+                "oled_init",
+                "display_raw"
+            ],
+            "scope": "global",
+            "text": "esp_err_t ssd1306_refresh_gram(ssd1306_handle_t dev)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    return ssd1306_write_data(dev, &device->s_chDisplayBuffer[0][0], sizeof(device->s_chDisplayBuffer));\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 353,
+                "line_end": 357,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "ssd1306_clear_screen",
+            "in_scope": true,
+            "calls": [
+                "memset"
+            ],
+            "is_called_by": [
+                "oled_init",
+                "display_raw",
+                "ssd1306_draw_string",
+                "ssd1306_init"
+            ],
+            "scope": "global",
+            "text": "void ssd1306_clear_screen(ssd1306_handle_t dev, uint8_t chFill)\n{\n    ssd1306_dev_t *device = (ssd1306_dev_t *) dev;\n    memset(device->s_chDisplayBuffer, chFill, sizeof(device->s_chDisplayBuffer));\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\ssd1306.c",
+            "location": {
+                "line_start": 359,
+                "line_end": 363,
                 "column_start": 0,
                 "column_end": 1
             }
@@ -143,6 +713,82 @@
             ]
         },
         {
+            "name": "i2c_master_write_to_device",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_write_reg"
+            ]
+        },
+        {
+            "name": "pdMS_TO_TICKS",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_write_reg"
+            ]
+        },
+        {
+            "name": "i2c_master_write_read_device",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_read_reg"
+            ]
+        },
+        {
+            "name": "pdMS_TO_TICKS",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_read_reg"
+            ]
+        },
+        {
+            "name": "vTaskDelay",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_init"
+            ]
+        },
+        {
+            "name": "pdMS_TO_TICKS",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_init"
+            ]
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": [
+                "max30102_init"
+            ]
+        },
+        {
+            "name": "snprintf",
+            "in_scope": false,
+            "is_called_by": [
+                "display_raw"
+            ]
+        },
+        {
+            "name": "snprintf",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "snprintf",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "snprintf",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "snprintf",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
             "name": "ESP_LOGE",
             "in_scope": false,
             "is_called_by": [
@@ -157,21 +803,21 @@
             ]
         },
         {
-            "name": "esp_err_to_name",
+            "name": "pdMS_TO_TICKS",
             "in_scope": false,
             "is_called_by": [
                 "app_main"
             ]
         },
         {
-            "name": "ESP_LOGI",
+            "name": "vTaskDelay",
             "in_scope": false,
             "is_called_by": [
-                "i2c_scanner"
+                "app_main"
             ]
         },
         {
-            "name": "ESP_LOGI",
+            "name": "ESP_LOGE",
             "in_scope": false,
             "is_called_by": []
         },
@@ -182,6 +828,16 @@
         },
         {
             "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "ESP_LOGE",
             "in_scope": false,
             "is_called_by": []
         },
@@ -189,59 +845,225 @@
             "name": "i2c_cmd_link_create",
             "in_scope": false,
             "is_called_by": [
-                "i2c_probe_address"
+                "ssd1306_write_data"
             ]
         },
         {
-            "name": "i2c_master_write_byte",
+            "name": "assert",
             "in_scope": false,
             "is_called_by": [
-                "i2c_probe_address"
-            ]
-        },
-        {
-            "name": "i2c_master_stop",
-            "in_scope": false,
-            "is_called_by": [
-                "i2c_probe_address"
+                "ssd1306_write_data"
             ]
         },
         {
             "name": "i2c_master_start",
             "in_scope": false,
             "is_called_by": [
-                "i2c_probe_address"
+                "ssd1306_write_data"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_master_write_byte",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_data"
+            ]
+        },
+        {
+            "name": "i2c_master_write_byte",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_master_write",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_data"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_master_stop",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_data"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_cmd_link_delete",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_data"
             ]
         },
         {
             "name": "i2c_master_cmd_begin",
             "in_scope": false,
             "is_called_by": [
-                "i2c_probe_address"
+                "ssd1306_write_data"
             ]
         },
         {
-            "name": "pdMS_TO_TICKS",
+            "name": "free",
             "in_scope": false,
             "is_called_by": [
-                "i2c_probe_address"
+                "ssd1306_delete"
             ]
+        },
+        {
+            "name": "i2c_cmd_link_create",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "i2c_master_write_byte",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_master_start",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "i2c_master_write_byte",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_master_write",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_master_stop",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "assert",
+            "in_scope": false,
+            "is_called_by": []
         },
         {
             "name": "i2c_cmd_link_delete",
             "in_scope": false,
             "is_called_by": [
-                "i2c_probe_address"
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "i2c_master_cmd_begin",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_write_cmd"
+            ]
+        },
+        {
+            "name": "abs",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_draw_line"
+            ]
+        },
+        {
+            "name": "COORDINATE_SWAP",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_draw_line"
+            ]
+        },
+        {
+            "name": "COORDINATE_SWAP",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "abs",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "calloc",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_create"
+            ]
+        },
+        {
+            "name": "memset",
+            "in_scope": false,
+            "is_called_by": [
+                "ssd1306_clear_screen"
             ]
         }
     ],
     "unprocessed_files": [
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\dependencies.lock",
+            "tags": []
+        },
         {
             "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\sdkconfig",
             "tags": []
         },
         {
             "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\SEB.MD",
+            "tags": []
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\managed_components\\espressif__ssd1306\\.component_hash",
             "tags": []
         }
     ]
