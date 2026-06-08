@@ -1,0 +1,248 @@
+{
+    "containing_directory": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware",
+    "files": [
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\CMakeLists.txt",
+            "tags": [
+                "build_system"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "# The following five lines of boilerplate have to be in your project's\n# CMakeLists in this exact order for cmake to work correctly\ncmake_minimum_required(VERSION 3.22)\n\ninclude($ENV{IDF_PATH}/tools/cmake/project.cmake)\nproject(health_monitor_firmware)\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\CMakeLists.txt",
+            "tags": [
+                "build_system"
+            ],
+            "classes": [],
+            "functions": [],
+            "includes": [],
+            "included_by": [],
+            "text": "idf_component_register(SRCS \"health_monitor_firmware.c\"\n                    INCLUDE_DIRS \".\")\n"
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "tags": [
+                "source",
+                "clock_config"
+            ],
+            "classes": [],
+            "functions": [
+                "i2c_master_init",
+                "app_main",
+                "i2c_scanner",
+                "i2c_probe_address"
+            ],
+            "includes": [],
+            "included_by": [],
+            "text": "#include <stdio.h>\n#include \"driver/i2c.h\"\n#include \"esp_log.h\"\n\n// ============================================================\n// CONFIGURATION \u2014 you don't need to change these\n// ============================================================\n#define I2C_MASTER_SCL_IO       22          // SCL pin on ESP32\n#define I2C_MASTER_SDA_IO       21          // SDA pin on ESP32\n#define I2C_MASTER_NUM          I2C_NUM_0   // I2C port number\n#define I2C_MASTER_FREQ_HZ      100000      // 100kHz standard speed\n#define I2C_MASTER_TIMEOUT_MS   1000        // timeout in ms\n\nstatic const char *TAG = \"I2C_SCANNER\";\n\n// ============================================================\n// TASK 1 \u2014 Initialize the I2C bus\n// Fill in the i2c_config_t struct fields below\n// Use the #defines above for pin numbers and frequency\n// ============================================================\nstatic esp_err_t i2c_master_init(void)\n{\n    i2c_config_t conf = {\n        .mode = I2C_MODE_MASTER,\n        .sda_io_num = I2C_MASTER_SDA_IO,       // GPIO 21\n        .scl_io_num = I2C_MASTER_SCL_IO,       // GPIO 22\n        .sda_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SDA\n        .scl_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SCL\n        .master.clk_speed = I2C_MASTER_FREQ_HZ, // 100 kHz\n    };\n\n    // Apply the configuration to the I2C port\n    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);\n    if (err != ESP_OK) return err;\n\n    // Install the I2C driver\n    // Parameters: port, mode, rx buffer (0 for master), tx buffer (0 for master), flags\n    return i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);\n}\n\n// ============================================================\n// TASK 2 \u2014 Probe a single I2C address\n// This sends a start condition to the given address and checks\n// if anything responds with an ACK\n// You don't need to change this function\n// ============================================================\nstatic bool i2c_probe_address(uint8_t address)\n{\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    i2c_master_start(cmd);\n    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, true);\n    i2c_master_stop(cmd);\n\n    esp_err_t err = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n    i2c_cmd_link_delete(cmd);\n\n    return (err == ESP_OK);\n}\n\n// ============================================================\n// TASK 3 \u2014 Scan all I2C addresses and print results\n// Fill in the loop below to scan addresses 1 through 127\n// For each address, call i2c_probe_address()\n// If it returns true, log the address using ESP_LOGI\n// ============================================================\nstatic void i2c_scanner(void)\n{\n    ESP_LOGI(TAG, \"Starting I2C scan...\");\n    int devices_found = 0;\n\n    for (uint8_t address = 1; address < 128; address++)\n    {\n        if (i2c_probe_address(address))\n        {\n            ESP_LOGI(TAG, \"Found device at address: 0x%02X\", address);\n            devices_found++;\n        }\n    }\n\n    if (devices_found == 0) {\n        ESP_LOGI(TAG, \"No I2C devices found\");\n    } else {\n        ESP_LOGI(TAG, \"Scan complete \u2014 %d device(s) found\", devices_found);\n    }\n}\n\n// ============================================================\n// MAIN \u2014 do not modify this\n// ============================================================\nvoid app_main(void)\n{\n    // Initialize I2C\n    esp_err_t err = i2c_master_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"I2C initialization failed: %s\", esp_err_to_name(err));\n        return;\n    }\n    ESP_LOGI(TAG, \"I2C initialized successfully\");\n\n    // Run the scanner\n    i2c_scanner();\n}"
+        }
+    ],
+    "functions": [
+        {
+            "name": "i2c_master_init",
+            "in_scope": true,
+            "calls": [
+                "i2c_param_config",
+                "i2c_driver_install"
+            ],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static esp_err_t i2c_master_init(void)\n{\n    i2c_config_t conf = {\n        .mode = I2C_MODE_MASTER,\n        .sda_io_num = I2C_MASTER_SDA_IO,       // GPIO 21\n        .scl_io_num = I2C_MASTER_SCL_IO,       // GPIO 22\n        .sda_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SDA\n        .scl_pullup_en = GPIO_PULLUP_ENABLE,   // enable internal pullup on SCL\n        .master.clk_speed = I2C_MASTER_FREQ_HZ, // 100 kHz\n    };\n\n    // Apply the configuration to the I2C port\n    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);\n    if (err != ESP_OK) return err;\n\n    // Install the I2C driver\n    // Parameters: port, mode, rx buffer (0 for master), tx buffer (0 for master), flags\n    return i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 20,
+                "line_end": 38,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "app_main",
+            "in_scope": true,
+            "calls": [
+                "i2c_master_init",
+                "i2c_scanner",
+                "ESP_LOGE",
+                "ESP_LOGI",
+                "esp_err_to_name"
+            ],
+            "is_called_by": [],
+            "scope": "global",
+            "text": "void app_main(void)\n{\n    // Initialize I2C\n    esp_err_t err = i2c_master_init();\n    if (err != ESP_OK) {\n        ESP_LOGE(TAG, \"I2C initialization failed: %s\", esp_err_to_name(err));\n        return;\n    }\n    ESP_LOGI(TAG, \"I2C initialized successfully\");\n\n    // Run the scanner\n    i2c_scanner();\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 89,
+                "line_end": 101,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "i2c_scanner",
+            "in_scope": true,
+            "calls": [
+                "ESP_LOGI",
+                "i2c_probe_address"
+            ],
+            "is_called_by": [
+                "app_main"
+            ],
+            "scope": "global",
+            "text": "static void i2c_scanner(void)\n{\n    ESP_LOGI(TAG, \"Starting I2C scan...\");\n    int devices_found = 0;\n\n    for (uint8_t address = 1; address < 128; address++)\n    {\n        if (i2c_probe_address(address))\n        {\n            ESP_LOGI(TAG, \"Found device at address: 0x%02X\", address);\n            devices_found++;\n        }\n    }\n\n    if (devices_found == 0) {\n        ESP_LOGI(TAG, \"No I2C devices found\");\n    } else {\n        ESP_LOGI(TAG, \"Scan complete \u2014 %d device(s) found\", devices_found);\n    }\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 65,
+                "line_end": 84,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "i2c_probe_address",
+            "in_scope": true,
+            "calls": [
+                "i2c_cmd_link_create",
+                "i2c_master_write_byte",
+                "i2c_master_stop",
+                "i2c_master_start",
+                "i2c_master_cmd_begin",
+                "pdMS_TO_TICKS",
+                "i2c_cmd_link_delete"
+            ],
+            "is_called_by": [
+                "i2c_scanner"
+            ],
+            "scope": "global",
+            "text": "static bool i2c_probe_address(uint8_t address)\n{\n    i2c_cmd_handle_t cmd = i2c_cmd_link_create();\n    i2c_master_start(cmd);\n    i2c_master_write_byte(cmd, (address << 1) | I2C_MASTER_WRITE, true);\n    i2c_master_stop(cmd);\n\n    esp_err_t err = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));\n    i2c_cmd_link_delete(cmd);\n\n    return (err == ESP_OK);\n}",
+            "file": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\main\\health_monitor_firmware.c",
+            "location": {
+                "line_start": 46,
+                "line_end": 57,
+                "column_start": 0,
+                "column_end": 1
+            }
+        },
+        {
+            "name": "i2c_param_config",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_master_init"
+            ]
+        },
+        {
+            "name": "i2c_driver_install",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_master_init"
+            ]
+        },
+        {
+            "name": "ESP_LOGE",
+            "in_scope": false,
+            "is_called_by": [
+                "app_main"
+            ]
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": [
+                "app_main"
+            ]
+        },
+        {
+            "name": "esp_err_to_name",
+            "in_scope": false,
+            "is_called_by": [
+                "app_main"
+            ]
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_scanner"
+            ]
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "ESP_LOGI",
+            "in_scope": false,
+            "is_called_by": []
+        },
+        {
+            "name": "i2c_cmd_link_create",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        },
+        {
+            "name": "i2c_master_write_byte",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        },
+        {
+            "name": "i2c_master_stop",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        },
+        {
+            "name": "i2c_master_start",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        },
+        {
+            "name": "i2c_master_cmd_begin",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        },
+        {
+            "name": "pdMS_TO_TICKS",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        },
+        {
+            "name": "i2c_cmd_link_delete",
+            "in_scope": false,
+            "is_called_by": [
+                "i2c_probe_address"
+            ]
+        }
+    ],
+    "unprocessed_files": [
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\sdkconfig",
+            "tags": []
+        },
+        {
+            "file_path": "C:\\Users\\patel\\OneDrive\\Documents\\code\\Projects\\health_monitor\\embedded\\health_monitor_firmware\\SEB.MD",
+            "tags": []
+        }
+    ]
+}

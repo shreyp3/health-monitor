@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/CMakeFiles/bootloader
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/CMakeFiles/bootloader.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/CMakeFiles/bootloader-complete.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

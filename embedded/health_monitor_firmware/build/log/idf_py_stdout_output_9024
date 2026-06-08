@@ -1,0 +1,798 @@
+Command: C:\Espressif\tools\python\v6.0.1\venv\Scripts\python.exe C:\esp\v6.0.1\esp-idf\tools/idf_monitor.py -p COM4 -b 115200 --toolchain-prefix xtensa-esp32-elf- --target esp32 --revision 0 C:\Users\patel\OneDrive\Documents\code\Projects\health_monitor\embedded\health_monitor_firmware\build\health_monitor_firmware.elf C:\Users\patel\OneDrive\Documents\code\Projects\health_monitor\embedded\health_monitor_firmware\build\bootloader\bootloader.elf --force-color -m 'C:\Espressif\tools\python\v6.0.1\venv\Scripts\python.exe' 'C:\esp\v6.0.1\esp-idf\tools\idf.py'
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (347) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (347) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: Found device at address: 0x57[0m
+[0;32mI (307) I2C_SCANNER: Scan complete — 1 device(s) found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+I (287) I2C_SCANNER: Starting I2C scan...
+[0;32mI (307) I2C_SCANNER: Found device at address: 0x57[0m
+[0;32mI (307) I2C_SCANNER: Scan complete — 1 device(s) found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: Found device at address: 0x57[0m
+[0;32mI (307) I2C_SCANNER: Scan complete — 1 device(s) found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: No I2C devices found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0040,len:6272
+load:0x40078000,len:15848
+load:0x40080400,len:3920
+entry 0x40080644
+[0;32mI (27) boot: ESP-IDF v6.0.1 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Jun  2 2026 01:15:33[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (29) boot: chip revision: v3.1[0m
+[0;32mI (32) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (35) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (42) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (49) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (62) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (75) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=09e94h ( 40596) map[0m
+[0;32mI (101) esp_image: segment 1: paddr=00019ebc vaddr=3ffb0000 size=02a5ch ( 10844) load[0m
+[0;32mI (105) esp_image: segment 2: paddr=0001c920 vaddr=40080000 size=036f8h ( 14072) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=0e820h ( 59424) map[0m
+[0;32mI (133) esp_image: segment 4: paddr=0002e848 vaddr=400836f8 size=0879ch ( 34716) load[0m
+[0;32mI (148) esp_image: segment 5: paddr=00036fec vaddr=50000000 size=00028h (    40) load[0m
+[0;32mI (154) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (154) boot: Disabling RNG early entropy source...[0m
+[0;32mI (166) cpu_start: Multicore app[0m
+[0;32mI (174) cpu_start: GPIO 3 and 1 are used as console UART I/O pins[0m
+[0;32mI (174) cpu_start: Pro cpu start user code[0m
+[0;32mI (174) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (176) app_init: Application information:[0m
+[0;32mI (180) app_init: Project name:     health_monitor_firmware[0m
+[0;32mI (185) app_init: App version:      1b63d27-dirty[0m
+[0;32mI (190) app_init: Compile time:     Jun  2 2026 01:15:06[0m
+[0;32mI (195) app_init: ELF file SHA256:  01310dc1b...[0m
+[0;32mI (199) app_init: ESP-IDF:          v6.0.1[0m
+[0;32mI (203) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (207) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (211) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (215) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (221) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (226) heap_init: At 3FFB3410 len 0002CBF0 (178 KiB): DRAM[0m
+[0;32mI (231) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (236) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (242) heap_init: At 4008BE94 len 0001416C (80 KiB): IRAM[0m
+[0;32mI (249) spi_flash: detected chip: generic[0m
+[0;32mI (251) spi_flash: flash io: dio[0m
+[0;33mW (254) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;33mW (266) i2c: This driver is an old driver, please migrate your application code to adapt `driver/i2c_master.h`[0m
+[0;32mI (277) main_task: Started on CPU0[0m
+[0;32mI (287) main_task: Calling app_main()[0m
+[0;32mI (287) I2C_SCANNER: I2C initialized successfully[0m
+[0;32mI (287) I2C_SCANNER: Starting I2C scan...[0m
+[0;32mI (307) I2C_SCANNER: Found device at address: 0x57[0m
+[0;32mI (307) I2C_SCANNER: Scan complete — 1 device(s) found[0m
+[0;32mI (307) main_task: Returned from app_main()[0m
