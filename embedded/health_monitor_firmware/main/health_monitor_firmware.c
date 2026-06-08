@@ -2,6 +2,8 @@
 #include <string.h>
 #include "driver/i2c.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "ssd1306.h"
 
 // ============================================================
@@ -14,13 +16,23 @@
 #define I2C_MASTER_TIMEOUT_MS   1000
 
 #define OLED_I2C_ADDRESS        0x3C
-#define OLED_WIDTH              128
-#define OLED_HEIGHT             64
+#define MAX30102_I2C_ADDRESS    0x57
+
+// MAX30102 Register addresses — these come from the datasheet
+#define MAX30102_REG_INTR_STATUS_1  0x00
+#define MAX30102_REG_INTR_ENABLE_1  0x02
+#define MAX30102_REG_FIFO_WR_PTR    0x04
+#define MAX30102_REG_FIFO_RD_PTR    0x06
+#define MAX30102_REG_FIFO_DATA      0x07
+#define MAX30102_REG_MODE_CONFIG    0x09
+#define MAX30102_REG_SPO2_CONFIG    0x0A
+#define MAX30102_REG_LED1_PA        0x0C
+#define MAX30102_REG_LED2_PA        0x0D
 
 static const char *TAG = "HEALTH_MONITOR";
 
 // ============================================================
-// TASK 1 — I2C initialization (same as before, don't change)
+// I2C INIT — same as before
 // ============================================================
 static esp_err_t i2c_master_init(void)
 {
@@ -38,56 +50,123 @@ static esp_err_t i2c_master_init(void)
 }
 
 // ============================================================
-// TASK 2 — Initialize the OLED display
-// You don't need to change this function
+// MAX30102 HELPER — write a single byte to a register
+// You don't need to change this
 // ============================================================
-static ssd1306_handle_t oled_init(void)
+static esp_err_t max30102_write_reg(uint8_t reg, uint8_t value)
 {
-    ssd1306_handle_t ssd1306_dev = ssd1306_create(I2C_MASTER_NUM, OLED_I2C_ADDRESS);
-    if (ssd1306_dev == NULL) {
-        ESP_LOGE(TAG, "Failed to create SSD1306 device");
-        return NULL;
-    }
-    esp_err_t err = ssd1306_refresh_gram(ssd1306_dev);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize display");
-        return NULL;
-    }
-    ssd1306_clear_screen(ssd1306_dev, 0x00);
-    return ssd1306_dev;
+    uint8_t data[2] = {reg, value};
+    return i2c_master_write_to_device(I2C_MASTER_NUM, MAX30102_I2C_ADDRESS,
+                                       data, sizeof(data),
+                                       pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));
 }
 
 // ============================================================
-// TASK 3 — Display vitals on the OLED screen
-// This function receives fake vitals for now
-// Later we will replace the fake values with real sensor data
-// Fill in the TODO sections to display each vital on screen
+// MAX30102 HELPER — read bytes from a register
+// You don't need to change this
 // ============================================================
-static void display_vitals(ssd1306_handle_t oled, int heart_rate, int spo2, float temperature)
+static esp_err_t max30102_read_reg(uint8_t reg, uint8_t *data, size_t len)
 {
-    // Buffer to hold formatted strings
-    char line[32];
+    return i2c_master_write_read_device(I2C_MASTER_NUM, MAX30102_I2C_ADDRESS,
+                                         &reg, 1, data, len,
+                                         pdMS_TO_TICKS(I2C_MASTER_TIMEOUT_MS));
+}
 
-    // Clear the screen before drawing
+// ============================================================
+// TASK 1 — Initialize the MAX30102 sensor
+// Write the correct values to each register using max30102_write_reg
+// The comments explain what each register does
+// ============================================================
+static esp_err_t max30102_init(void)
+{
+    esp_err_t err;
+
+    // Reset the sensor first — write 0x40 to MODE_CONFIG register
+    err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x40);
+    if (err != ESP_OK) return err;
+    vTaskDelay(pdMS_TO_TICKS(100)); // wait for reset
+
+    // Enable FIFO almost full interrupt — write 0xC0 to INTR_ENABLE_1
+    err = max30102_write_reg(MAX30102_REG_INTR_ENABLE_1, 0xC0);
+    if (err != ESP_OK) return err;
+
+    // Reset FIFO pointers — write 0x00 to FIFO_WR_PTR and FIFO_RD_PTR
+    err = max30102_write_reg(MAX30102_REG_FIFO_WR_PTR, 0x00);
+    if (err != ESP_OK) return err;
+    err = max30102_write_reg(MAX30102_REG_FIFO_RD_PTR, 0x00);
+    if (err != ESP_OK) return err;
+
+    // Set SpO2 mode — write 0x03 to MODE_CONFIG
+    // 0x03 = SpO2 mode (enables both RED and IR LEDs)
+    err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x03);
+    if (err != ESP_OK) return err;
+
+    // Set SpO2 config — write 0x27 to SPO2_CONFIG
+    // 0x27 = 100 samples/sec, 411us pulse width, 4096 ADC range
+    err = max30102_write_reg(MAX30102_REG_SPO2_CONFIG, 0x27);
+    if (err != ESP_OK) return err;
+
+    // Set LED brightness — write 0x24 to LED1_PA and LED2_PA
+    // 0x24 = ~7mA LED current, good for fingertip measurement
+    err = max30102_write_reg(MAX30102_REG_LED1_PA, 0x24);
+    if (err != ESP_OK) return err;
+    err = max30102_write_reg(MAX30102_REG_LED2_PA, 0x24);
+    if (err != ESP_OK) return err;
+
+    ESP_LOGI(TAG, "MAX30102 initialized");
+    return ESP_OK;
+}
+
+// ============================================================
+// TASK 2 — Read one sample from the FIFO buffer
+// Each sample contains 3 bytes RED + 3 bytes IR = 6 bytes total
+// You don't need to change this function
+// ============================================================
+static esp_err_t max30102_read_fifo(uint32_t *red, uint32_t *ir)
+{
+    uint8_t buf[6];
+    esp_err_t err = max30102_read_reg(MAX30102_REG_FIFO_DATA, buf, 6);
+    if (err != ESP_OK) return err;
+
+    // Each value is 18 bits packed into 3 bytes, mask off top 6 bits
+    *red = ((uint32_t)(buf[0] & 0x03) << 16) | ((uint32_t)buf[1] << 8) | buf[2];
+    *ir  = ((uint32_t)(buf[3] & 0x03) << 16) | ((uint32_t)buf[4] << 8) | buf[5];
+
+    return ESP_OK;
+}
+
+// ============================================================
+// OLED INIT — same as before
+// ============================================================
+static ssd1306_handle_t oled_init(void)
+{
+    ssd1306_handle_t oled = ssd1306_create(I2C_MASTER_NUM, OLED_I2C_ADDRESS);
+    if (oled == NULL) return NULL;
+    ssd1306_refresh_gram(oled);
+    ssd1306_clear_screen(oled, 0x00);
+    return oled;
+}
+
+// ============================================================
+// DISPLAY — show raw RED and IR values on OLED
+// ============================================================
+static void display_raw(ssd1306_handle_t oled, uint32_t red, uint32_t ir)
+{
+    char line[32];
     ssd1306_clear_screen(oled, 0x00);
 
-    // TODO: Format and display heart rate on line 1
-    snprintf(line, sizeof(line), "HR:  %d BPM", heart_rate);
+    snprintf(line, sizeof(line), "RED: %lu", red);
     ssd1306_draw_string(oled, 0, 0, (const uint8_t *)line, 16, 1);
 
-    // TODO: Format and display SpO2 on line 2
-    snprintf(line, sizeof(line), "SpO2: %d%%", spo2);
+    snprintf(line, sizeof(line), "IR:  %lu", ir);
     ssd1306_draw_string(oled, 0, 16, (const uint8_t *)line, 16, 1);
 
-    // TODO: Format and display temperature on line 3
-    snprintf(line, sizeof(line), "Temp: %.1fF", temperature);
+    snprintf(line, sizeof(line), "Place finger");
     ssd1306_draw_string(oled, 0, 32, (const uint8_t *)line, 16, 1);
 
-    // TODO: Add a status line at the bottom
-    snprintf(line, sizeof(line), "Status: OK");
+    snprintf(line, sizeof(line), "on sensor...");
     ssd1306_draw_string(oled, 0, 48, (const uint8_t *)line, 16, 1);
 
-    // Refresh the display to show the new content
     ssd1306_refresh_gram(oled);
 }
 
@@ -99,10 +178,9 @@ void app_main(void)
     // Initialize I2C
     esp_err_t err = i2c_master_init();
     if (err != ESP_OK) {
-        ESP_LOGE(TAG, "I2C init failed: %s", esp_err_to_name(err));
+        ESP_LOGE(TAG, "I2C init failed");
         return;
     }
-    ESP_LOGI(TAG, "I2C initialized");
 
     // Initialize OLED
     ssd1306_handle_t oled = oled_init();
@@ -110,21 +188,22 @@ void app_main(void)
         ESP_LOGE(TAG, "OLED init failed");
         return;
     }
-    ESP_LOGI(TAG, "OLED initialized");
 
-    // TODO: Fill in fake vitals values to test the display
-    int heart_rate = 70;
-    int spo2 = 99;
-    float temperature = 21.4;
+    // Initialize MAX30102
+    err = max30102_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "MAX30102 init failed");
+        return;
+    }
 
-    // Display vitals on screen
-    // TODO: call display_vitals with your fake values
-    display_vitals(oled, heart_rate, spo2, temperature);
-
-    // TODO: Add a loop that updates the display every second
-    // Use vTaskDelay(pdMS_TO_TICKS(1000)) for the delay
-    while(1) {
-        // TODO: call display_vitals here inside the loop
-        vTaskDelay(pdMS_TO_TICKS(1000));
+    // Main loop — read raw values and display them
+    uint32_t red = 0, ir = 0;
+    while (1) {
+        err = max30102_read_fifo(&red, &ir);
+        if (err == ESP_OK) {
+            ESP_LOGI(TAG, "RED: %lu  IR: %lu", red, ir);
+            display_raw(oled, red, ir);
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
