@@ -627,6 +627,7 @@ C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_m
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_gdbstub/CMakeFiles/install.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_gdbstub/CMakeFiles/install/local.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_gdbstub/CMakeFiles/install/strip.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/bt/CMakeFiles/__idf_bt.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/bt/CMakeFiles/edit_cache.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/bt/CMakeFiles/rebuild_cache.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/bt/CMakeFiles/list_install_components.dir

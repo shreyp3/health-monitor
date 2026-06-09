@@ -70,6 +70,8 @@ C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_m
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_netif/libesp_netif.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/wpa_supplicant/libwpa_supplicant.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_coex/libesp_coex.a
+C:/esp/v6.0.1/esp-idf/components/esp_coex/lib/esp32/libcoexist.a
+C:/esp/v6.0.1/esp-idf/components/bt/controller/lib_esp32/esp32/libbtdm_app.a
 C:/esp/v6.0.1/esp-idf/components/esp_wifi/lib/esp32/libcore.a
 C:/esp/v6.0.1/esp-idf/components/esp_wifi/lib/esp32/libespnow.a
 C:/esp/v6.0.1/esp-idf/components/esp_wifi/lib/esp32/libmesh.a
@@ -131,6 +133,8 @@ C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_m
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_wifi/libesp_wifi.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_spi/libesp_driver_spi.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_gdbstub/libesp_gdbstub.a
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/bt/libbt.a
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_spi/libesp_driver_spi.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/unity/libunity.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/cmock/libcmock.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/unity/libunity.a
@@ -169,12 +173,12 @@ C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_m
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_sdmmc/libesp_driver_sdmmc.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_sd_intf/libesp_driver_sd_intf.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_sdspi/libesp_driver_sdspi.a
-C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_spi/libesp_driver_spi.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_touch_sens/libesp_driver_touch_sens.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_driver_twai/libesp_driver_twai.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_eth/libesp_eth.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_hal_lcd/libesp_hal_lcd.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_hid/libesp_hid.a
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/bt/libbt.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/tcp_transport/libtcp_transport.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_http_client/libesp_http_client.a
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/esp-idf/esp_http_server/libesp_http_server.a

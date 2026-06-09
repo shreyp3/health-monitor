@@ -1,12 +1,12 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-
-const FAKE_DATA = {
-  heartRate: 72,
-  spo2: 98,
-  temperature: 98.4,
-  motion: "Low",
-  connected: false,
-};
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { useBLE } from "../hooks/useBLE";
 
 function VitalCard({
   label,
@@ -29,49 +29,96 @@ function VitalCard({
 }
 
 export default function DashboardScreen() {
-  const data = FAKE_DATA;
+  const {
+    isScanning,
+    connectedDevice,
+    vitals,
+    error,
+    scanAndConnect,
+    disconnect,
+  } = useBLE();
+
+  const connected = connectedDevice !== null;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Health Monitor</Text>
 
+      {/* Connection status badge */}
       <View
         style={[
           styles.connectionBadge,
-          { backgroundColor: data.connected ? "#1a3a1a" : "#3a1a1a" },
+          { backgroundColor: connected ? "#1a3a1a" : "#3a1a1a" },
         ]}
       >
         <View
           style={[
             styles.connectionDot,
-            { backgroundColor: data.connected ? "#00ff88" : "#ff4444" },
+            { backgroundColor: connected ? "#00ff88" : "#ff4444" },
           ]}
         />
         <Text
           style={[
             styles.connectionText,
-            { color: data.connected ? "#00ff88" : "#ff4444" },
+            { color: connected ? "#00ff88" : "#ff4444" },
           ]}
         >
-          {data.connected ? "Device Connected" : "Device Disconnected"}
+          {connected
+            ? "Device Connected"
+            : isScanning
+              ? "Scanning..."
+              : "Device Disconnected"}
         </Text>
       </View>
 
+      {/* Error message */}
+      {error && (
+        <View style={styles.errorBadge}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {/* Connect / Disconnect button */}
+      <TouchableOpacity
+        style={[styles.connectButton, connected && styles.disconnectButton]}
+        onPress={connected ? disconnect : scanAndConnect}
+        disabled={isScanning}
+      >
+        {isScanning ? (
+          <ActivityIndicator color="#000" />
+        ) : (
+          <Text style={styles.connectButtonText}>
+            {connected ? "Disconnect" : "Connect to Device"}
+          </Text>
+        )}
+      </TouchableOpacity>
+
+      {/* Vitals grid */}
       <View style={styles.grid}>
         <VitalCard
           label="Heart Rate"
-          value={data.heartRate}
+          value={vitals.hr > 0 ? Math.round(vitals.hr) : "--"}
           unit="BPM"
           color="#ff4444"
         />
-        <VitalCard label="SpO2" value={data.spo2} unit="%" color="#4488ff" />
+        <VitalCard
+          label="SpO2"
+          value={vitals.spo2 > 0 ? Math.round(vitals.spo2) : "--"}
+          unit="%"
+          color="#4488ff"
+        />
         <VitalCard
           label="Temperature"
-          value={data.temperature}
+          value={vitals.temp > 0 ? vitals.temp.toFixed(1) : "--"}
           unit="°F"
           color="#ffaa00"
         />
-        <VitalCard label="Motion" value={data.motion} unit="" color="#00ff88" />
+        <VitalCard
+          label="Motion"
+          value={vitals.motion || "--"}
+          unit=""
+          color="#00ff88"
+        />
       </View>
     </ScrollView>
   );
@@ -97,7 +144,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
     borderRadius: 12,
-    marginBottom: 24,
+    marginBottom: 12,
     gap: 8,
   },
   connectionDot: {
@@ -108,6 +155,33 @@ const styles = StyleSheet.create({
   connectionText: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  errorBadge: {
+    backgroundColor: "#3a1a1a",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+  },
+  errorText: {
+    color: "#ff4444",
+    fontSize: 13,
+  },
+  connectButton: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  disconnectButton: {
+    backgroundColor: "#1a1a1a",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  connectButtonText: {
+    color: "#000",
+    fontSize: 15,
+    fontWeight: "700",
   },
   grid: {
     flexDirection: "row",

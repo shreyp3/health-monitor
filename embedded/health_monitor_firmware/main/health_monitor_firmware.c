@@ -3,6 +3,12 @@
 #include <math.h>
 #include "driver/i2c.h"
 #include "esp_log.h"
+#include "esp_bt.h"
+#include "esp_bt_main.h"
+#include "esp_gap_ble_api.h"
+#include "esp_gatts_api.h"
+#include "esp_bt_defs.h"
+#include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "ssd1306.h"
@@ -41,16 +47,36 @@
 #define MPU6050_REG_ACCEL_CONFIG    0x1C
 #define MPU6050_REG_ACCEL_XOUT_H    0x3B
 
-// Heart rate algorithm
+// Heart rate thresholds
 #define FINGER_THRESHOLD        50000
 #define MOTION_LIGHT_THRESHOLD  0.05f
 #define MOTION_ACTIVE_THRESHOLD 0.30f
 
+// ============================================================
+// BLE CONFIGURATION
+// Custom UUIDs for our health monitor service
+// These uniquely identify our device to the app
+// ============================================================
+#define HEALTH_MONITOR_SERVICE_UUID     0x00FF
+#define HEALTH_MONITOR_CHAR_UUID        0xFF01
+#define DEVICE_NAME                     "HealthMonitor"
+
+#define GATTS_APP_ID                    0
+#define GATTS_NUM_HANDLE                4
+
 static const char *TAG = "HEALTH_MONITOR";
 
-// Global vitals shared between tasks
+// Global vitals
 static float heartrate = 0.0f;
 static float pctspo2 = 0.0f;
+
+// BLE connection state
+static bool ble_connected = false;
+static uint16_t ble_conn_id = 0;
+static uint16_t gatts_if_global = 0;
+static uint16_t char_handle = 0;
+static uint16_t descr_handle = 0;
+static bool notifications_enabled = false;
 
 // ============================================================
 // I2C INIT
@@ -91,32 +117,25 @@ static esp_err_t max30102_read_reg(uint8_t reg, uint8_t *data, size_t len)
 static esp_err_t max30102_init(void)
 {
     esp_err_t err;
-
     err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x40);
     if (err != ESP_OK) return err;
     vTaskDelay(pdMS_TO_TICKS(100));
-
     err = max30102_write_reg(MAX30102_REG_FIFO_CONFIG, (0x2 << 5) | 0x10);
     if (err != ESP_OK) return err;
-
     err = max30102_write_reg(MAX30102_REG_FIFO_WR_PTR, 0x00);
     if (err != ESP_OK) return err;
     err = max30102_write_reg(MAX30102_REG_OVF_COUNTER, 0x00);
     if (err != ESP_OK) return err;
     err = max30102_write_reg(MAX30102_REG_FIFO_RD_PTR, 0x00);
     if (err != ESP_OK) return err;
-
     err = max30102_write_reg(MAX30102_REG_MODE_CONFIG, 0x03);
     if (err != ESP_OK) return err;
-
     err = max30102_write_reg(MAX30102_REG_SPO2_CONFIG, (0x3 << 5) | (0x3 << 2) | 0x3);
     if (err != ESP_OK) return err;
-
     err = max30102_write_reg(MAX30102_REG_LED1_PA, 0xA0);
     if (err != ESP_OK) return err;
     err = max30102_write_reg(MAX30102_REG_LED2_PA, 0xD0);
     if (err != ESP_OK) return err;
-
     ESP_LOGI(TAG, "MAX30102 initialized");
     return ESP_OK;
 }
@@ -191,7 +210,8 @@ static ssd1306_handle_t oled_init(void)
     return oled;
 }
 
-static void display_vitals(ssd1306_handle_t oled, float bpm, float spo2, float temp_f, const char *activity)
+static void display_vitals(ssd1306_handle_t oled, float bpm, float spo2,
+                            float temp_f, const char *activity)
 {
     char line[32];
     ssd1306_clear_screen(oled, 0x00);
@@ -224,18 +244,199 @@ static void display_vitals(ssd1306_handle_t oled, float bpm, float spo2, float t
 }
 
 // ============================================================
+// BLE ADVERTISING DATA
+// This is what the phone sees when scanning for devices
+// ============================================================
+static esp_ble_adv_params_t adv_params = {
+    .adv_int_min        = 0x20,
+    .adv_int_max        = 0x40,
+    .adv_type           = ADV_TYPE_IND,
+    .own_addr_type      = BLE_ADDR_TYPE_PUBLIC,
+    .channel_map        = ADV_CHNL_ALL,
+    .adv_filter_policy  = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
+};
+
+static esp_ble_adv_data_t adv_data = {
+    .set_scan_rsp        = false,
+    .include_name        = true,
+    .include_txpower     = false,
+    .min_interval        = 0x0006,
+    .max_interval        = 0x0010,
+    .appearance          = 0x00,
+    .manufacturer_len    = 0,
+    .p_manufacturer_data = NULL,
+    .service_data_len    = 0,
+    .p_service_data      = NULL,
+    .service_uuid_len    = 0,
+    .p_service_uuid      = NULL,
+    .flag                = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
+};
+
+// ============================================================
+// GATT SERVICE DEFINITION
+// Defines the structure of our BLE service
+// ============================================================
+static const uint16_t primary_service_uuid     = ESP_GATT_UUID_PRI_SERVICE;
+static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
+static const uint16_t character_client_config_uuid = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
+static const uint8_t char_prop_notify          = ESP_GATT_CHAR_PROP_BIT_NOTIFY |
+                                                  ESP_GATT_CHAR_PROP_BIT_READ;
+static const uint16_t health_service_uuid      = HEALTH_MONITOR_SERVICE_UUID;
+static const uint16_t health_char_uuid         = HEALTH_MONITOR_CHAR_UUID;
+static const uint8_t health_char_value[1]      = {0};
+static uint8_t health_cccd[2]                  = {0x00, 0x00};
+
+static const esp_gatts_attr_db_t gatt_db[] = {
+    // Service declaration
+    [0] = {
+        {ESP_GATT_AUTO_RSP},
+        {ESP_UUID_LEN_16, (uint8_t *)&primary_service_uuid,
+         ESP_GATT_PERM_READ,
+         sizeof(uint16_t), sizeof(health_service_uuid),
+         (uint8_t *)&health_service_uuid}
+    },
+    // Characteristic declaration
+    [1] = {
+        {ESP_GATT_AUTO_RSP},
+        {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
+         ESP_GATT_PERM_READ,
+         sizeof(uint8_t), sizeof(uint8_t),
+         (uint8_t *)&char_prop_notify}
+    },
+    // Characteristic value
+    [2] = {
+        {ESP_GATT_AUTO_RSP},
+        {ESP_UUID_LEN_16, (uint8_t *)&health_char_uuid,
+         ESP_GATT_PERM_READ,
+         128, sizeof(health_char_value),
+         (uint8_t *)health_char_value}
+    },
+    // Client Characteristic Configuration Descriptor (CCCD)
+    // This is what the app writes to to enable notifications
+    [3] = {
+        {ESP_GATT_AUTO_RSP},
+        {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid,
+         ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+         sizeof(uint16_t), sizeof(health_cccd),
+         (uint8_t *)health_cccd}
+    },
+};
+
+// ============================================================
+// GAP EVENT HANDLER
+// Handles advertising and connection events
+// ============================================================
+static void gap_event_handler(esp_gap_ble_cb_event_t event,
+                               esp_ble_gap_cb_param_t *param)
+{
+    switch (event) {
+    case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
+        esp_ble_gap_start_advertising(&adv_params);
+        break;
+    case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+        if (param->adv_start_cmpl.status == ESP_BT_STATUS_SUCCESS) {
+            ESP_LOGI(TAG, "BLE advertising started");
+        }
+        break;
+    case ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT:
+        ESP_LOGI(TAG, "BLE advertising stopped");
+        break;
+    default:
+        break;
+    }
+}
+
+// ============================================================
+// GATTS EVENT HANDLER
+// Handles GATT server events — connections, reads, writes
+// ============================================================
+static void gatts_event_handler(esp_gatts_cb_event_t event,
+                                  esp_gatt_if_t gatts_if,
+                                  esp_ble_gatts_cb_param_t *param)
+{
+    switch (event) {
+    case ESP_GATTS_REG_EVT:
+        // Registration complete — set device name and configure advertising
+        esp_ble_gap_set_device_name(DEVICE_NAME);
+        esp_ble_gap_config_adv_data(&adv_data);
+        esp_ble_gatts_create_attr_tab(gatt_db, gatts_if,
+                                       sizeof(gatt_db)/sizeof(gatt_db[0]),
+                                       GATTS_APP_ID);
+        gatts_if_global = gatts_if;
+        break;
+
+    case ESP_GATTS_CREAT_ATTR_TAB_EVT:
+        // Attribute table created — start the service
+        if (param->add_attr_tab.status == ESP_GATT_OK) {
+            char_handle  = param->add_attr_tab.handles[2];
+            descr_handle = param->add_attr_tab.handles[3];
+            esp_ble_gatts_start_service(param->add_attr_tab.handles[0]);
+            ESP_LOGI(TAG, "GATT service started");
+        }
+        break;
+
+    case ESP_GATTS_CONNECT_EVT:
+        ble_connected = true;
+        ble_conn_id = param->connect.conn_id;
+        ESP_LOGI(TAG, "BLE client connected");
+        // Stop advertising when connected
+        esp_ble_gap_stop_advertising();
+        break;
+
+    case ESP_GATTS_DISCONNECT_EVT:
+        ble_connected = false;
+        notifications_enabled = false;
+        ESP_LOGI(TAG, "BLE client disconnected — restarting advertising");
+        esp_ble_gap_start_advertising(&adv_params);
+        break;
+
+    case ESP_GATTS_WRITE_EVT:
+        // App wrote to CCCD to enable/disable notifications
+        if (param->write.handle == descr_handle) {
+            uint16_t cccd_val = param->write.value[0] |
+                                 (param->write.value[1] << 8);
+            notifications_enabled = (cccd_val == 0x0001);
+            ESP_LOGI(TAG, "Notifications %s",
+                     notifications_enabled ? "enabled" : "disabled");
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+// ============================================================
+// SEND VITALS OVER BLE
+// Packages all vitals as JSON and sends as BLE notification
+// ============================================================
+static void ble_send_vitals(float hr, float spo2, float temp, const char *motion)
+{
+    if (!ble_connected || !notifications_enabled) return;
+
+    char json[128];
+    snprintf(json, sizeof(json),
+             "{\"hr\":%.0f,\"spo2\":%.0f,\"temp\":%.1f,\"motion\":\"%s\"}",
+             hr, spo2, temp, motion);
+
+    esp_ble_gatts_send_indicate(gatts_if_global, ble_conn_id,
+                                 char_handle,
+                                 strlen(json), (uint8_t *)json,
+                                 false);
+
+    ESP_LOGI(TAG, "BLE sent: %s", json);
+}
+
+// ============================================================
 // HEART RATE TASK
-// Uses 2nd order Butterworth bandpass filter (0.5-5Hz)
 // ============================================================
 static void max30102_task(void *pvParameters)
 {
     float firxv[5] = {0}, firyv[5] = {0};
     float fredxv[5] = {0}, fredyv[5] = {0};
-
     float hrarray[5] = {0};
     float spo2array[5] = {0};
     int hrarraycnt = 0;
-
     float meastime = 0.0f;
     float lastmeastime = 0.0f;
     int tcnt = 0;
@@ -266,7 +467,6 @@ static void max30102_task(void *pvParameters)
                     continue;
                 }
 
-                // Butterworth bandpass filter on IR
                 firxv[0] = firxv[1]; firxv[1] = firxv[2];
                 firxv[2] = firxv[3]; firxv[3] = firxv[4];
                 firxv[4] = (float)ir_raw / 3.48311f;
@@ -279,7 +479,6 @@ static void max30102_task(void *pvParameters)
                            + (-1.1718123813f * firyv[2])
                            + ( 1.9738037992f * firyv[3]);
 
-                // Butterworth bandpass filter on RED
                 fredxv[0] = fredxv[1]; fredxv[1] = fredxv[2];
                 fredxv[2] = fredxv[3]; fredxv[3] = fredxv[4];
                 fredxv[4] = (float)red_raw / 3.48311f;
@@ -292,19 +491,16 @@ static void max30102_task(void *pvParameters)
                             + (-1.1718123813f * fredyv[2])
                             + ( 1.9738037992f * fredyv[3]);
 
-                // Peak detection on filtered signal
                 if (-1.0f * firyv[4] >= 100.0f &&
                     -1.0f * firyv[2] > -1.0f * firyv[0] &&
                     -1.0f * firyv[2] > -1.0f * firyv[4] &&
                     meastime - lastmeastime > 0.5f) {
 
                     hrarray[hrarraycnt % 5] = 60.0f / (meastime - lastmeastime);
-
                     float spo2 = 110.0f - 25.0f * ((fredyv[4] / fredxv[4]) /
                                                      (firyv[4] / firxv[4]));
                     if (spo2 > 100.0f) spo2 = 99.9f;
                     spo2array[hrarraycnt % 5] = spo2;
-
                     lastmeastime = meastime;
                     hrarraycnt++;
 
@@ -323,7 +519,6 @@ static void max30102_task(void *pvParameters)
                 }
             }
         }
-
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
@@ -333,6 +528,14 @@ static void max30102_task(void *pvParameters)
 // ============================================================
 void app_main(void)
 {
+    // Initialize NVS — required for BLE
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
+        ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        nvs_flash_erase();
+        nvs_flash_init();
+    }
+
     esp_err_t err = i2c_master_init();
     if (err != ESP_OK) { ESP_LOGE(TAG, "I2C init failed"); return; }
 
@@ -345,7 +548,18 @@ void app_main(void)
     err = mpu6050_init();
     if (err != ESP_OK) { ESP_LOGE(TAG, "MPU6050 init failed"); return; }
 
-    ESP_LOGI(TAG, "All sensors initialized");
+    // Initialize BLE
+    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+    esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_bt_controller_init(&bt_cfg));
+    ESP_ERROR_CHECK(esp_bt_controller_enable(ESP_BT_MODE_BLE));
+    ESP_ERROR_CHECK(esp_bluedroid_init());
+    ESP_ERROR_CHECK(esp_bluedroid_enable());
+    ESP_ERROR_CHECK(esp_ble_gap_register_callback(gap_event_handler));
+    ESP_ERROR_CHECK(esp_ble_gatts_register_callback(gatts_event_handler));
+    ESP_ERROR_CHECK(esp_ble_gatts_app_register(GATTS_APP_ID));
+
+    ESP_LOGI(TAG, "All systems initialized");
 
     xTaskCreate(max30102_task, "max30102_task", 4096, NULL, 5, NULL);
 
@@ -360,9 +574,12 @@ void app_main(void)
 
         display_vitals(oled, heartrate, pctspo2, temp_f, activity);
 
+        // Send vitals over BLE
+        ble_send_vitals(heartrate, pctspo2, temp_f, activity);
+
         ESP_LOGI(TAG, "Temp: %.1fF  Activity: %s  HR: %.1f  SpO2: %.1f",
                  temp_f, activity, heartrate, pctspo2);
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
