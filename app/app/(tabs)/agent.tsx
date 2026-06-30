@@ -7,22 +7,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
-import Groq from "groq-sdk";
-
-const groq = new Groq({
-  apiKey: process.env.EXPO_PUBLIC_GROQ_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-const FAKE_VITALS = {
-  heartRate: 72,
-  spo2: 98,
-  temperature: 98.4,
-  motion: "Low",
-};
+import { useBLEContext } from "../context/BLEContext";
 
 type SessionReading = {
-  vitals: typeof FAKE_VITALS;
+  vitals: {
+    hr: number;
+    spo2: number;
+    temp: number;
+    motion: string;
+  };
   agentResponse: string;
   timestamp: string;
 };
@@ -40,9 +33,7 @@ function MessageCard({ message }: { message: Message }) {
   const colors = { normal: "#00ff88", warning: "#ffaa00", info: "#4488ff" };
 
   return (
-    <View
-      style={[styles.messageCard, { borderLeftColor: colors[message.type] }]}
-    >
+    <View style={[styles.messageCard, { borderLeftColor: colors[message.type] }]}>
       <View style={styles.messageHeader}>
         <Text style={[styles.messageIcon, { color: colors[message.type] }]}>
           {icons[message.type]}
@@ -55,9 +46,12 @@ function MessageCard({ message }: { message: Message }) {
 }
 
 export default function AgentScreen() {
+  const { vitals, connectedDevice } = useBLEContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [sessionHistory, setSessionHistory] = useState<SessionReading[]>([]);
+
+  const connected = connectedDevice !== null;
 
   const getTimestamp = () => {
     const now = new Date();
@@ -72,39 +66,56 @@ export default function AgentScreen() {
         sessionHistory.length > 0
           ? `Previous readings this session:\n${sessionHistory
               .map(
-                (r, i) =>
-                  `${r.timestamp} - HR: ${r.vitals.heartRate} BPM, SpO2: ${r.vitals.spo2}%, Temp: ${r.vitals.temperature}°F, Motion: ${r.vitals.motion}\nYour response: ${r.agentResponse}`,
+                (r) =>
+                  `${r.timestamp} - HR: ${r.vitals.hr} BPM, SpO2: ${r.vitals.spo2}%, Temp: ${r.vitals.temp}°F, Motion: ${r.vitals.motion}\nYour response: ${r.agentResponse}`,
               )
               .join("\n\n")}\n\n`
           : "";
 
-      const response = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          {
-            role: "system",
-            content: `You are a health monitoring AI assistant. You analyze vital signs and provide clear, 
-            concise health feedback. You are not a doctor and always remind users to consult healthcare 
-            professionals for medical advice. Keep responses under 3 sentences. Be direct and helpful.
-            You have memory of previous readings this session and should reference trends when relevant.
-            Classify your response as one of: normal (vitals look good), warning (something needs attention), 
-            or info (general health tip). Start your response with [normal], [warning], or [info].`,
-          },
-          {
-            role: "user",
-            content: `${historyContext}Current vital signs:
-            Heart Rate: ${FAKE_VITALS.heartRate} BPM
-            SpO2: ${FAKE_VITALS.spo2}%
-            Temperature: ${FAKE_VITALS.temperature}°F
-            Motion Level: ${FAKE_VITALS.motion}
-            
-            Based on the current readings${sessionHistory.length > 0 ? " and the session history above" : ""}, provide a brief health insight.`,
-          },
-        ],
-        max_tokens: 150,
+      const currentVitals = connected
+        ? vitals
+        : { hr: 72, spo2: 98, temp: 98.4, motion: "Resting" };
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.EXPO_PUBLIC_GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          max_tokens: 150,
+          messages: [
+            {
+              role: "system",
+              content: `You are a health monitoring AI assistant. You analyze vital signs and provide clear, 
+              concise health feedback. You are not a doctor and always remind users to consult healthcare 
+              professionals for medical advice. Keep responses under 3 sentences. Be direct and helpful.
+              You have memory of previous readings this session and should reference trends when relevant.
+              Classify your response as one of: normal (vitals look good), warning (something needs attention), 
+              or info (general health tip). Start your response with [normal], [warning], or [info].`,
+            },
+            {
+              role: "user",
+              content: `${historyContext}Current vital signs:
+              Heart Rate: ${currentVitals.hr} BPM
+              SpO2: ${currentVitals.spo2}%
+              Temperature: ${currentVitals.temp}°F
+              Motion Level: ${currentVitals.motion}
+              
+              Based on the current readings${sessionHistory.length > 0 ? " and the session history above" : ""}, provide a brief health insight.`,
+            },
+          ],
+        }),
       });
 
-      const content = response.choices[0].message.content || "";
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API error: ${response.status} — ${errorText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0].message.content || "";
 
       let type: "normal" | "warning" | "info" = "info";
       let cleanContent = content;
@@ -125,7 +136,7 @@ export default function AgentScreen() {
       setSessionHistory((prev) => [
         ...prev,
         {
-          vitals: FAKE_VITALS,
+          vitals: currentVitals,
           agentResponse: cleanContent,
           timestamp,
         },
@@ -140,8 +151,16 @@ export default function AgentScreen() {
       };
 
       setMessages((prev) => [newMessage, ...prev]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Groq API error:", error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: "agent",
+        content: `Error: ${error.message}`,
+        timestamp: getTimestamp(),
+        type: "warning",
+      };
+      setMessages((prev) => [errorMessage, ...prev]);
     } finally {
       setLoading(false);
     }
@@ -155,10 +174,14 @@ export default function AgentScreen() {
       </View>
 
       <View style={styles.vitalsRow}>
-        <Text style={styles.vitalsLabel}>Current readings:</Text>
+        <Text style={styles.vitalsLabel}>
+          {connected ? "Live readings:" : "Demo readings (connect device for live data):"}
+        </Text>
         <Text style={styles.vitalsText}>
-          ❤ {FAKE_VITALS.heartRate} BPM · O₂ {FAKE_VITALS.spo2}% ·{" "}
-          {FAKE_VITALS.temperature}°F · {FAKE_VITALS.motion} motion
+          ❤ {connected ? Math.round(vitals.hr) : 72} BPM · O₂{" "}
+          {connected ? Math.round(vitals.spo2) : 98}% ·{" "}
+          {connected ? vitals.temp.toFixed(1) : "98.4"}°F ·{" "}
+          {connected ? vitals.motion : "Resting"} motion
         </Text>
       </View>
 
@@ -181,8 +204,7 @@ export default function AgentScreen() {
         {messages.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              Tap "Analyze My Vitals" to get AI feedback on your current
-              readings.
+              Tap "Analyze My Vitals" to get AI feedback on your current readings.
             </Text>
           </View>
         ) : (
