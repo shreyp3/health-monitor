@@ -1,14 +1,11 @@
 import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import { useBLEContext } from "../context/BLEContext";
 
 const screenWidth = Dimensions.get("window").width;
 
-const FAKE_HISTORY = {
-  heartRate: [68, 72, 75, 71, 69, 74, 78, 76, 72, 70],
-  spo2: [97, 98, 98, 99, 97, 98, 96, 98, 99, 98],
-  temperature: [98.1, 98.3, 98.4, 98.6, 98.4, 98.2, 98.5, 98.3, 98.4, 98.2],
-  labels: ["0m", "1m", "2m", "3m", "4m", "5m", "6m", "7m", "8m", "9m"],
-};
+const FALLBACK_DATA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+const FALLBACK_LABELS = ["", "", "", "", "", "", "", "", "", ""];
 
 function ChartCard({
   title,
@@ -23,13 +20,16 @@ function ChartCard({
   color: string;
   unit: string;
 }) {
+  const safeData = data.length > 0 ? data : FALLBACK_DATA;
+  const safeLabels = labels.length > 0 ? labels : FALLBACK_LABELS;
+
   return (
     <View style={styles.chartCard}>
       <Text style={styles.chartTitle}>{title}</Text>
       <LineChart
         data={{
-          labels,
-          datasets: [{ data }],
+          labels: safeLabels,
+          datasets: [{ data: safeData }],
         }}
         width={screenWidth - 48}
         height={160}
@@ -53,32 +53,67 @@ function ChartCard({
 }
 
 export default function HistoryScreen() {
+  const { history, connectedDevice } = useBLEContext();
+  const connected = connectedDevice !== null;
+
+  // Extract arrays from history entries
+  const heartRateData = history.map((e) => e.vitals.hr);
+  const spo2Data = history.map((e) => e.vitals.spo2);
+  const tempData = history.map((e) => e.vitals.temp);
+
+  // Generate time labels from timestamps
+  const labels = history.map((e, i) => {
+    if (i === 0 || i === history.length - 1) {
+      const seconds = Math.round((Date.now() - e.timestamp) / 1000);
+      return `${seconds}s`;
+    }
+    return "";
+  });
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Session History</Text>
-      <Text style={styles.subtitle}>Last 10 minutes</Text>
+      <Text style={styles.subtitle}>
+        {connected
+          ? `${history.length} readings collected`
+          : "Connect device to collect data"}
+      </Text>
 
-      <ChartCard
-        title="Heart Rate"
-        data={FAKE_HISTORY.heartRate}
-        labels={FAKE_HISTORY.labels}
-        color="#ff4444"
-        unit="BPM"
-      />
-      <ChartCard
-        title="SpO2"
-        data={FAKE_HISTORY.spo2}
-        labels={FAKE_HISTORY.labels}
-        color="#4488ff"
-        unit="%"
-      />
-      <ChartCard
-        title="Temperature"
-        data={FAKE_HISTORY.temperature}
-        labels={FAKE_HISTORY.labels}
-        color="#ffaa00"
-        unit="°F"
-      />
+      {history.length === 0 && (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>
+            {connected
+              ? "Waiting for readings..."
+              : "No data yet — connect your device on the Dashboard tab"}
+          </Text>
+        </View>
+      )}
+
+      {history.length > 1 && (
+        <>
+          <ChartCard
+            title="Heart Rate"
+            data={heartRateData}
+            labels={labels}
+            color="#ff4444"
+            unit="BPM"
+          />
+          <ChartCard
+            title="SpO2"
+            data={spo2Data}
+            labels={labels}
+            color="#4488ff"
+            unit="%"
+          />
+          <ChartCard
+            title="Temperature"
+            data={tempData}
+            labels={labels}
+            color="#ffaa00"
+            unit="°F"
+          />
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -102,6 +137,20 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 14,
     marginBottom: 24,
+  },
+  emptyState: {
+    backgroundColor: "#141414",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  emptyText: {
+    color: "#555",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 22,
   },
   chartCard: {
     backgroundColor: "#141414",

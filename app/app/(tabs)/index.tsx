@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { useBLE } from "../hooks/useBLE";
+import { useBLEContext } from "../context/BLEContext";
 
 function VitalCard({
   label,
@@ -36,7 +36,7 @@ export default function DashboardScreen() {
     error,
     scanAndConnect,
     disconnect,
-  } = useBLE();
+  } = useBLEContext();
 
   const connected = connectedDevice !== null;
 
@@ -44,7 +44,6 @@ export default function DashboardScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Health Monitor</Text>
 
-      {/* Connection status badge */}
       <View
         style={[
           styles.connectionBadge,
@@ -71,14 +70,12 @@ export default function DashboardScreen() {
         </Text>
       </View>
 
-      {/* Error message */}
       {error && (
         <View style={styles.errorBadge}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
 
-      {/* Connect / Disconnect button */}
       <TouchableOpacity
         style={[styles.connectButton, connected && styles.disconnectButton]}
         onPress={connected ? disconnect : scanAndConnect}
@@ -87,13 +84,14 @@ export default function DashboardScreen() {
         {isScanning ? (
           <ActivityIndicator color="#000" />
         ) : (
-          <Text style={styles.connectButtonText}>
+          <Text
+            style={[styles.connectButtonText, connected && { color: "#fff" }]}
+          >
             {connected ? "Disconnect" : "Connect to Device"}
           </Text>
         )}
       </TouchableOpacity>
 
-      {/* Vitals grid */}
       <View style={styles.grid}>
         <VitalCard
           label="Heart Rate"

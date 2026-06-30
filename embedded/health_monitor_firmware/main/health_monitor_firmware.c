@@ -16,16 +16,16 @@
 // ============================================================
 // CONFIGURATION
 // ============================================================
-#define I2C_MASTER_SCL_IO       21
-#define I2C_MASTER_SDA_IO       22
+#define I2C_MASTER_SCL_IO       21  // SCL binds to pin 21
+#define I2C_MASTER_SDA_IO       22  // SDA binds to pin 22
 #define I2C_MASTER_NUM          I2C_NUM_0
 #define I2C_MASTER_FREQ_HZ      100000
 #define I2C_MASTER_TIMEOUT_MS   1000
 
-#define OLED_I2C_ADDRESS        0x3C
-#define MAX30102_I2C_ADDRESS    0x57
-#define MLX90614_I2C_ADDRESS    0x5A
-#define MPU6050_I2C_ADDRESS     0x68
+#define OLED_I2C_ADDRESS        0x3C    // I2C Address of OLED screen
+#define MAX30102_I2C_ADDRESS    0x57    // I2C Address of heart rate monitor
+#define MLX90614_I2C_ADDRESS    0x5A    // I2C Address of skin temp monitor
+#define MPU6050_I2C_ADDRESS     0x68    // I2C Address of accelerometer
 
 // MAX30102 registers
 #define MAX30102_REG_INTR_ENABLE_1  0x02
@@ -84,7 +84,7 @@ static bool notifications_enabled = false;
 static esp_err_t i2c_master_init(void)
 {
     i2c_config_t conf = {
-        .mode = I2C_MODE_MASTER,
+        .mode = I2C_MODE_MASTER,    // The 
         .sda_io_num = I2C_MASTER_SDA_IO,
         .scl_io_num = I2C_MASTER_SCL_IO,
         .sda_pullup_en = GPIO_PULLUP_ENABLE,
