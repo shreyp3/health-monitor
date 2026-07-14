@@ -33,7 +33,9 @@ function MessageCard({ message }: { message: Message }) {
   const colors = { normal: "#00ff88", warning: "#ffaa00", info: "#4488ff" };
 
   return (
-    <View style={[styles.messageCard, { borderLeftColor: colors[message.type] }]}>
+    <View
+      style={[styles.messageCard, { borderLeftColor: colors[message.type] }]}
+    >
       <View style={styles.messageHeader}>
         <Text style={[styles.messageIcon, { color: colors[message.type] }]}>
           {icons[message.type]}
@@ -46,7 +48,7 @@ function MessageCard({ message }: { message: Message }) {
 }
 
 export default function AgentScreen() {
-  const { vitals, connectedDevice } = useBLEContext();
+  const { vitals, connectedDevice, profile } = useBLEContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [sessionHistory, setSessionHistory] = useState<SessionReading[]>([]);
@@ -76,38 +78,49 @@ export default function AgentScreen() {
         ? vitals
         : { hr: 72, spo2: 98, temp: 98.4, motion: "Resting" };
 
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.EXPO_PUBLIC_GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 150,
-          messages: [
-            {
-              role: "system",
-              content: `You are a health monitoring AI assistant. You analyze vital signs and provide clear, 
-              concise health feedback. You are not a doctor and always remind users to consult healthcare 
-              professionals for medical advice. Keep responses under 3 sentences. Be direct and helpful.
-              You have memory of previous readings this session and should reference trends when relevant.
-              Classify your response as one of: normal (vitals look good), warning (something needs attention), 
-              or info (general health tip). Start your response with [normal], [warning], or [info].`,
-            },
-            {
-              role: "user",
-              content: `${historyContext}Current vital signs:
+      const response = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            max_tokens: 150,
+            messages: [
+              {
+                role: "system",
+                content: `You are a health monitoring AI assistant. You analyze vital signs and provide clear, 
+                          concise health feedback. You are not a doctor and always remind users to consult healthcare 
+                          professionals for medical advice. Keep responses under 3 sentences. Be direct and helpful.
+                          You have memory of previous readings this session and should reference trends when relevant. 
+                          ${profile.age ? `The user is ${profile.age} years old.` : ""}
+                          ${profile.weight ? `They weigh ${profile.weight} lbs.` : ""}
+                          ${profile.height ? `Their height is ${profile.height} ft.` : ""}
+                          ${profile.fitnessLevel ? `Their fitness level is ${profile.fitnessLevel}.` : ""}
+                          The device being used to monitor the user's vitals is not industry-grade, so it may fluctuate values
+                          or provide awkward readings at times, so keep that in mind when giving responses, but don't explicitly mention
+                          to the users that the device may be faulty.
+                          Use this context to personalize your health insights.
+                          Classify your response as one of: normal (vitals look good), warning (something needs attention), 
+                          or info (general health tip). Start your response with [normal], [warning], or [info].`,
+              },
+              {
+                role: "user",
+                content: `${historyContext}Current vital signs:
               Heart Rate: ${currentVitals.hr} BPM
               SpO2: ${currentVitals.spo2}%
               Temperature: ${currentVitals.temp}°F
               Motion Level: ${currentVitals.motion}
               
               Based on the current readings${sessionHistory.length > 0 ? " and the session history above" : ""}, provide a brief health insight.`,
-            },
-          ],
-        }),
-      });
+              },
+            ],
+          }),
+        },
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -175,7 +188,9 @@ export default function AgentScreen() {
 
       <View style={styles.vitalsRow}>
         <Text style={styles.vitalsLabel}>
-          {connected ? "Live readings:" : "Demo readings (connect device for live data):"}
+          {connected
+            ? "Live readings:"
+            : "Demo readings (connect device for live data):"}
         </Text>
         <Text style={styles.vitalsText}>
           ❤ {connected ? Math.round(vitals.hr) : 72} BPM · O₂{" "}
@@ -204,7 +219,8 @@ export default function AgentScreen() {
         {messages.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              Tap "Analyze My Vitals" to get AI feedback on your current readings.
+              Tap "Analyze My Vitals" to get AI feedback on your current
+              readings.
             </Text>
           </View>
         ) : (

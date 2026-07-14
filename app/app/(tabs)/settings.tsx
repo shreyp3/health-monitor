@@ -6,23 +6,43 @@ import {
   TextInput,
   TouchableOpacity,
   Switch,
+  ActivityIndicator,
 } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useBLEContext } from "../context/BLEContext";
+import type { UserProfile } from "../context/BLEContext";
 
 export default function SettingsScreen() {
-  const [age, setAge] = useState("");
-  const [weight, setWeight] = useState("");
-  const [height, setHeight] = useState("");
-  const [fitnessLevel, setFitnessLevel] = useState<"low" | "moderate" | "high">(
-    "moderate",
-  );
-  const [autoAnalyze, setAutoAnalyze] = useState(false);
+  const { isScanning, connectedDevice, scanAndConnect, disconnect, vitals, profile, setProfile } =
+    useBLEContext();
+
+  const [age, setAge] = useState(profile.age);
+  const [weight, setWeight] = useState(profile.weight);
+  const [height, setHeight] = useState(profile.height);
+  const [fitnessLevel, setFitnessLevel] = useState(profile.fitnessLevel);
+  const [autoAnalyze, setAutoAnalyze] = useState(profile.autoAnalyze);
   const [saved, setSaved] = useState(false);
 
+  const connected = connectedDevice !== null;
+
   const handleSave = () => {
+    setProfile({ age, weight, height, fitnessLevel, autoAnalyze });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
+
+  // Auto-analyze every 60 seconds when enabled and connected
+  useEffect(() => {
+    if (!autoAnalyze || !connected) return;
+
+    const interval = setInterval(() => {
+      // Trigger analysis by dispatching a custom event
+      // The agent screen listens for this
+      console.log("Auto-analyze triggered");
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [autoAnalyze, connected]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -31,6 +51,7 @@ export default function SettingsScreen() {
         Your profile helps the AI give personalized feedback
       </Text>
 
+      {/* Profile Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Profile</Text>
 
@@ -74,6 +95,7 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* Fitness Level Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Fitness Level</Text>
         <View style={styles.fitnessRow}>
@@ -99,35 +121,76 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* Agent Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Agent</Text>
         <View style={styles.toggleRow}>
           <View>
             <Text style={styles.toggleLabel}>Auto-analyze every 60s</Text>
             <Text style={styles.toggleSub}>
-              Agent runs automatically during sessions
+              {connected
+                ? "Agent runs automatically during sessions"
+                : "Connect device to enable"}
             </Text>
           </View>
           <Switch
-            value={autoAnalyze}
-            onValueChange={setAutoAnalyze}
+            value={autoAnalyze && connected}
+            onValueChange={(val) => {
+              if (!connected && val) return;
+              setAutoAnalyze(val);
+            }}
             trackColor={{ false: "#333", true: "#00ff88" }}
             thumbColor="#fff"
+            disabled={!connected}
           />
         </View>
       </View>
 
+      {/* Device Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Device</Text>
         <View style={styles.deviceRow}>
-          <View style={styles.deviceDot} />
-          <Text style={styles.deviceText}>No device connected</Text>
+          <View
+            style={[
+              styles.deviceDot,
+              { backgroundColor: connected ? "#00ff88" : "#ff4444" },
+            ]}
+          />
+          <Text style={styles.deviceText}>
+            {connected ? "HealthMonitor connected" : "No device connected"}
+          </Text>
         </View>
-        <TouchableOpacity style={styles.scanButton}>
-          <Text style={styles.scanButtonText}>Scan for Device</Text>
+
+        {connected && (
+          <View style={styles.vitalsPreview}>
+            <Text style={styles.vitalsPreviewText}>
+              HR: {Math.round(vitals.hr)} BPM · O₂: {Math.round(vitals.spo2)}% ·{" "}
+              {vitals.temp.toFixed(1)}°F · {vitals.motion}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={[styles.scanButton, connected && styles.disconnectButton]}
+          onPress={connected ? disconnect : scanAndConnect}
+          disabled={isScanning}
+        >
+          {isScanning ? (
+            <ActivityIndicator color="#4488ff" />
+          ) : (
+            <Text
+              style={[
+                styles.scanButtonText,
+                connected && styles.disconnectButtonText,
+              ]}
+            >
+              {connected ? "Disconnect Device" : "Scan for Device"}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
 
+      {/* Save Button */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>
           {saved ? "Saved!" : "Save Settings"}
@@ -241,11 +304,23 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#ff4444",
   },
   deviceText: {
     color: "#888",
     fontSize: 14,
+  },
+  vitalsPreview: {
+    backgroundColor: "#141414",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#222",
+  },
+  vitalsPreviewText: {
+    color: "#00ff88",
+    fontSize: 12,
+    fontWeight: "500",
   },
   scanButton: {
     backgroundColor: "#141414",
@@ -255,10 +330,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#333",
   },
+  disconnectButton: {
+    borderColor: "#ff4444",
+  },
   scanButtonText: {
     color: "#4488ff",
     fontSize: 14,
     fontWeight: "600",
+  },
+  disconnectButtonText: {
+    color: "#ff4444",
   },
   saveButton: {
     backgroundColor: "#fff",

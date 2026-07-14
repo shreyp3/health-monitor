@@ -2,10 +2,17 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useBLE, VitalsData } from "../hooks/useBLE";
 import { Device } from "react-native-ble-plx";
 
-// History entry with timestamp
 export type VitalsHistoryEntry = {
   vitals: VitalsData;
   timestamp: number;
+};
+
+export type UserProfile = {
+  age: string;
+  weight: string;
+  height: string;
+  fitnessLevel: "low" | "moderate" | "high";
+  autoAnalyze: boolean;
 };
 
 type BLEContextType = {
@@ -16,16 +23,25 @@ type BLEContextType = {
   scanAndConnect: () => Promise<void>;
   disconnect: () => Promise<void>;
   history: VitalsHistoryEntry[];
+  profile: UserProfile;
+  setProfile: (profile: UserProfile) => void;
 };
 
 const BLEContext = createContext<BLEContextType | null>(null);
 
+const DEFAULT_PROFILE: UserProfile = {
+  age: "",
+  weight: "",
+  height: "",
+  fitnessLevel: "moderate",
+  autoAnalyze: false,
+};
+
 export function BLEProvider({ children }: { children: React.ReactNode }) {
   const ble = useBLE();
   const [history, setHistory] = useState<VitalsHistoryEntry[]>([]);
+  const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
 
-  // Every time vitals update, add to history
-  // Keep last 20 entries
   useEffect(() => {
     if (ble.vitals.hr > 0 || ble.vitals.spo2 > 0) {
       setHistory((prev) => {
@@ -40,7 +56,7 @@ export function BLEProvider({ children }: { children: React.ReactNode }) {
   }, [ble.vitals]);
 
   return (
-    <BLEContext.Provider value={{ ...ble, history }}>
+    <BLEContext.Provider value={{ ...ble, history, profile, setProfile }}>
       {children}
     </BLEContext.Provider>
   );
