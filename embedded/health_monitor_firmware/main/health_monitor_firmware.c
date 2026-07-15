@@ -559,6 +559,14 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_ble_gatts_register_callback(gatts_event_handler));
     ESP_ERROR_CHECK(esp_ble_gatts_app_register(GATTS_APP_ID));
 
+    esp_ble_gap_set_prefer_conn_params(
+        (esp_bd_addr_t){0}, // applies to all connections
+        0x18,  // min interval 30ms
+        0x28,  // max interval 50ms
+        0,     // latency
+        400    // timeout 4 seconds
+    );
+
     ESP_LOGI(TAG, "All systems initialized");
 
     xTaskCreate(max30102_task, "max30102_task", 4096, NULL, 5, NULL);
@@ -580,6 +588,6 @@ void app_main(void)
         ESP_LOGI(TAG, "Temp: %.1fF  Activity: %s  HR: %.1f  SpO2: %.1f",
                  temp_f, activity, heartrate, pctspo2);
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
