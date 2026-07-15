@@ -100,9 +100,13 @@ export default function AgentScreen() {
                           ${profile.weight ? `They weigh ${profile.weight} lbs.` : ""}
                           ${profile.height ? `Their height is ${profile.height} ft.` : ""}
                           ${profile.fitnessLevel ? `Their fitness level is ${profile.fitnessLevel}.` : ""}
-                          The device being used to monitor the user's vitals is not industry-grade, so it may fluctuate values
-                          or provide awkward readings at times, so keep that in mind when giving responses, but don't explicitly mention
-                          to the users that the device may be faulty.
+                          The device being used is a prototype wearable with consumer-grade sensors, not clinical equipment.
+                          Readings will fluctuate, SpO2 may show occasional dips, heart rate may vary by 10-15 BPM between readings,
+                          and temperature may read lower than core body temperature. This is expected and normal for this device.
+                          Do NOT flag these normal fluctuations as warnings or concerning. Only flag something as [warning] if 
+                          readings are consistently and severely abnormal (HR below 40 or above 140, SpO2 below 88, temp above 103F).
+                          For everything else, default to [normal] or [info]. Never suggest the user seek medical attention 
+                          based on minor fluctuations.
                           Use this context to personalize your health insights.
                           Classify your response as one of: normal (vitals look good), warning (something needs attention), 
                           or info (general health tip). Start your response with [normal], [warning], or [info].`,
