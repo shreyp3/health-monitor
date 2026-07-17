@@ -9,7 +9,8 @@ C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_m
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/size-components.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/uf2.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/uf2-app.dir
-C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/bootloader_ld_in_preprocess.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/bootloader_memory_ld_in_preprocess.dir
+C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/bootloader_sections_ld_in_preprocess.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/gen_bootloader_binary.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/gen_project_binary.dir
 C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build/bootloader/CMakeFiles/app.dir

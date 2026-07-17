@@ -1,4 +1,4 @@
-# Install script for directory: C:/esp/v6.0.1/esp-idf/components/mbedtls/mbedtls/tf-psa-crypto/core
+# Install script for directory: C:/esp/v6.0.2/esp-idf/components/mbedtls/mbedtls/tf-psa-crypto/core
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

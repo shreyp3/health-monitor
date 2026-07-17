@@ -588,6 +588,6 @@ void app_main(void)
         ESP_LOGI(TAG, "Temp: %.1fF  Activity: %s  HR: %.1f  SpO2: %.1f",
                  temp_f, activity, heartrate, pctspo2);
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

@@ -40,13 +40,10 @@ $<TARGET_FILE:__idf_lwip>
 $<TARGET_FILE:mbedtls>
 $<TARGET_FILE:mbedx509>
 $<TARGET_FILE:tfpsacrypto>
-$<TARGET_FILE:builtin>
-$<TARGET_FILE:idf::esp_security>
-$<TARGET_FILE:everest>
-$<TARGET_FILE:p256m>
 $<TARGET_FILE:__idf_nvs_flash>
 $<TARGET_FILE:__idf_nvs_sec_provider>
 $<TARGET_FILE:idf::mbedtls>
+$<TARGET_FILE:idf::esp_security>
 $<TARGET_FILE:__idf_esp_hal_wdt>
 $<TARGET_FILE:__idf_esp_hal_ana_conv>
 $<TARGET_FILE:__idf_esp_hal_i2s>
