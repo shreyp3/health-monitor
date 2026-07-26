@@ -1,7 +1,7 @@
 {
     "version":            "1.3",
     "project_name":       "health_monitor_firmware",
-    "project_version":    "b7f3226-dirty",
+    "project_version":    "ea5d8bc-dirty",
     "project_path":       "C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware",
     "idf_path":           "C:/esp/v6.0.2/esp-idf",
     "build_dir":          "C:/Users/patel/OneDrive/Documents/code/Projects/health_monitor/embedded/health_monitor_firmware/build",
